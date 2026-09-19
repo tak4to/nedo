@@ -651,7 +651,8 @@ def settled_center_z(cstate, cx, cy, half):
 
 
 def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
-                         bridge=GAP / 2.0 + 0.003):
+                         bridge=GAP / 2.0 + 0.003, min_cover=None,
+                         require_centroid=True):
     """Stand-in for the evaluator's third gate: `place_item` warps the box
     in, runs SETTLE_STEPS of physics, and fails the episode if the box
     then moved more than `displacement_threshold` or tipped more than
@@ -664,9 +665,18 @@ def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
     if its centre of mass projects inside the contact patch:
 
       1. the item's centre sits over a support,
-      2. at least SUPPORT_MIN_COVER of the footprint is carried,
+      2. at least `min_cover` (default SUPPORT_MIN_COVER) of the footprint
+         is carried,
       3. the contact patch's centroid is near the item's centre, so the
-         load is not all on one edge.
+         load is not all on one edge (skipped when `require_centroid` is
+         False).
+
+    `min_cover`/`require_centroid` exist so the last-resort ladder in
+    agent._fallback_action can relax gates (2) and (3) in steps instead of
+    jumping straight to `require_support=False` (no support check at all,
+    not even (1)) -- docs/2026-09-20-strategy.md A-1. Every caller inside
+    the primary search passes the defaults, so this is a no-op until
+    something asks for less.
 
     The `bridge` allowance spans the ordinary inter-item GAP -- every
     neighbouring pair has one by design, and a rigid box resting across a
@@ -691,6 +701,12 @@ def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
 
     if not carried(cx, cy):
         return False
+    if min_cover is None:
+        min_cover = SUPPORT_MIN_COVER
+    if min_cover <= 0.0 and not require_centroid:
+        # Weakest rung: only gate (1) above, i.e. "positive contact area",
+        # applies. No point walking the grid just to discard it.
+        return True
     hit = 0
     total = 0
     sx = sy = 0.0
@@ -703,8 +719,10 @@ def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
                 hit += 1
                 sx += px
                 sy += py
-    if hit < SUPPORT_MIN_COVER * total:
+    if hit < min_cover * total:
         return False
+    if not require_centroid:
+        return True
     # Load centroid must be near the item's own centre, else it tips.
     return (abs(sx / hit - cx) <= hx * SUPPORT_CENTROID_TOL and
             abs(sy / hit - cy) <= hy * SUPPORT_CENTROID_TOL)
@@ -971,7 +989,8 @@ def _collect(cstate, item_spec, relax, xy_fn):
     return candidates
 
 
-def _first_valid(cstate, candidates, time_deadline, require_support=True, verify=None):
+def _first_valid(cstate, candidates, time_deadline, require_support=True, verify=None,
+                 min_cover=None, require_centroid=True):
     g = cstate.geom
     obstacles = cstate.obstacle_boxes()
     checked = 0
@@ -983,7 +1002,9 @@ def _first_valid(cstate, candidates, time_deadline, require_support=True, verify
             break
         checked += 1
         if (require_support and support is not None
-                and not _footprint_supported(cx, cy, fx, fy, support)):
+                and not _footprint_supported(cx, cy, fx, fy, support,
+                                             min_cover=min_cover,
+                                             require_centroid=require_centroid)):
             continue
         if not validate_placement(g, obstacles, (cx, cy, cz), (hx, hy, hz)):
             continue
@@ -1004,7 +1025,7 @@ def _first_valid(cstate, candidates, time_deadline, require_support=True, verify
 
 
 def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_support=True,
-                   verify=None):
+                   verify=None, min_cover=None, require_centroid=True):
     """Highest-scoring valid placement for this item, or None.
 
     Candidates are enumerated and scored first, then validated in score
@@ -1013,9 +1034,13 @@ def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_s
     first because they pack tightly; a grid sweep is the fallback, since
     on its own the extreme-point set goes empty long before the container
     is actually full.
+
+    `min_cover`/`require_centroid` pass straight through to
+    `_footprint_supported` via `_first_valid` -- see there for what they
+    relax and why.
     """
     result = _first_valid(cstate, _collect(cstate, item_spec, relax, _xy_candidates),
-                          time_deadline, require_support, verify)
+                          time_deadline, require_support, verify, min_cover, require_centroid)
     if result is not None:
         return result
     for step in (0.05, 0.025):
@@ -1023,7 +1048,8 @@ def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_s
             break
         cands = _collect(cstate, item_spec, relax,
                          lambda cs, fx, fy, walls, _s=step: _grid_xy(cs, fx, fy, _s, walls))
-        result = _first_valid(cstate, cands, time_deadline, require_support, verify)
+        result = _first_valid(cstate, cands, time_deadline, require_support, verify,
+                              min_cover, require_centroid)
         if result is not None:
             return result
     return None
@@ -1295,7 +1321,7 @@ def pack_metrics(states):
 
 
 def choose_action(container_states, pool, time_deadline, relax=False, require_support=True,
-                  verifier=None):
+                  verifier=None, min_cover=None, require_centroid=True):
     """Returns (pool_idx, container_idx, pos_local, orn_idx) or None.
 
     When the pool offers a choice, big items go first. The placement
@@ -1324,7 +1350,7 @@ def choose_action(container_states, pool, time_deadline, relax=False, require_su
             per_call = max((time_deadline - now) / max(left, 1), MIN_CALL_BUDGET)
             verify = None if verifier is None else verifier(cidx, spec)
             result = best_placement(cstate, spec, min(time_deadline, now + per_call), relax,
-                                    require_support, verify)
+                                    require_support, verify, min_cover, require_centroid)
             if result is None:
                 continue
             pos, orn, score = result

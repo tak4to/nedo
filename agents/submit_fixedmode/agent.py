@@ -35,6 +35,7 @@ if _THIS_DIR not in sys.path:
 import numpy as np  # noqa: E402
 
 import geometry  # noqa: E402
+import packer  # noqa: E402
 from packer import ContainerState, best_placement, choose_action  # noqa: E402
 
 # How optimize() spends its 180s. Kept as an explicit switch because the
@@ -103,6 +104,33 @@ def _item_spec(d, pool_index=None):
     }
 
 
+# Support-check ladder for _fallback_action, weakest-last. Every rung keeps
+# `relax=True` (the priority/soft stacking constraint is already dropped at
+# rung 1, see the docstring below) and every rung still runs the full
+# geometry oracle (inclusion + transport path) inside choose_action -- only
+# the *static-stability* gate in _footprint_supported gets progressively
+# weaker. docs/2026-09-20-strategy.md A-1: the same-shaped agent that hit
+# public 61.092 measured its single biggest jump (+2.33) from exactly this
+# shape of ladder, because a total-audit of its "nothing fits" episodes
+# found legal placements behind the support filter alone in the majority of
+# them. Going straight from the full threshold to no check at all (what
+# this did before) skips over that: SUPPORT_MIN_COVER=0.63 and "off" are
+# far apart, and the two extra rungs below are what's actually in between.
+_SUPPORT_LADDER = (
+    # Lv1: the same threshold and centroid check the primary search uses.
+    # Only relax=True is new versus what already failed.
+    dict(require_support=True, min_cover=None, require_centroid=True),
+    # Lv2: half the ordinary coverage requirement, centroid check still on
+    # -- catches placements that are carried but not carried *enough*.
+    dict(require_support=True, min_cover=packer.SUPPORT_MIN_COVER * 0.5, require_centroid=True),
+    # Lv3: "positive contact area" only -- the item's centre must rest over
+    # some support, nothing else. Matches the other agent's third rung.
+    dict(require_support=True, min_cover=0.0, require_centroid=False),
+    # Lv4: no static-stability check at all (the pre-existing fallback).
+    dict(require_support=False, min_cover=None, require_centroid=True),
+)
+
+
 def _fallback_action(observation, deadline=None, twins=None, pool_list_raw=None):
     """Last-resort ladder when the primary search finds nothing.
 
@@ -117,12 +145,16 @@ def _fallback_action(observation, deadline=None, twins=None, pool_list_raw=None)
     and ends the episode. The failure case is byte-for-byte the state we
     would have ended on anyway, so a risky attempt is a free option.
 
-    Ladder, each rung strictly weaker than the last:
+    Ladder, each rung strictly weaker than the last (see _SUPPORT_LADDER):
       1. relax the priority/soft stacking constraint (a placement-score
-         penalty is far cheaper than ending the episode),
-      2. also drop the static-stability requirement entirely, accepting
+         penalty is far cheaper than ending the episode), full support
+         threshold still enforced,
+      2. lower the footprint-coverage threshold,
+      3. drop coverage and centroid entirely, requiring only that the
+         item's centre rests on *something*,
+      4. drop the static-stability requirement entirely, accepting
          overhangs the settle step may or may not tolerate,
-      3. only then, an unvalidated position -- at which point the episode is
+      5. only then, an unvalidated position -- at which point the episode is
          over regardless of what we return.
     Never allowed to raise.
     """
@@ -141,13 +173,14 @@ def _fallback_action(observation, deadline=None, twins=None, pool_list_raw=None)
         container_states = {c['index']: ContainerState(c) for c in container_list}
         pool = [(i, _item_spec(d, i)) for i, d in enumerate(pool_list)]
 
-        # Both rungs get the *whole* remaining budget, not half each. Rung 2
-        # only runs at all if rung 1 came back empty, and choose_action
-        # returns as soon as it finds something, so giving rung 1 less time
-        # than the old single attempt had is a pure regression -- measured as
-        # one scene dropping from 18 placed items to 16. If rung 1 burns the
-        # entire budget, rung 2 gets nothing and we land exactly where the old
-        # code did; anything it finds in leftover time is free.
+        # Every rung gets the *whole* remaining budget, not an even split.
+        # A later rung only runs at all if every earlier one came back
+        # empty, and choose_action returns as soon as it finds something, so
+        # giving rung 1 less time than the old single attempt had is a pure
+        # regression -- measured as one scene dropping from 18 placed items
+        # to 16. If rung 1 burns the entire budget, the rest get nothing and
+        # we land exactly where the two-rung version did; anything a later
+        # rung finds in leftover time is free.
         verifier = None
         if twins and pool_list_raw:
             checks = [0]
@@ -168,9 +201,9 @@ def _fallback_action(observation, deadline=None, twins=None, pool_list_raw=None)
                         return True
                 return verify
 
-        for require_support in (True, False):
+        for level in _SUPPORT_LADDER:
             action = choose_action(container_states, pool, deadline, relax=True,
-                                   require_support=require_support, verifier=verifier)
+                                   verifier=verifier, **level)
             if action is not None:
                 pool_idx, cidx, pos, orn = action
                 return {
