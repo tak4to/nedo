@@ -1,0 +1,21 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+n = 64 offline scenes, optimize budget 60s
+
+quantity                              pred    real    bias      r
+items placed                          39.0    39.0    +0.0  0.978
+composite (4 metrics, proxy scale)   69.71   68.33   +1.38  0.521
+-> vs the scored 5-metric mean               59.57          0.483
+
+residual sd 4.55 (real composite sd across scenes 5.09)
+rollout over-counts items on 25/64 scenes, under-counts on 23

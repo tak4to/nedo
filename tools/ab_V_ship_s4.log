@@ -1,0 +1,4 @@
+pybullet build time: Aug 29 2026 17:03:42
+### V_ship_s4  overrides=['p:ROLLOUT_SETTLE=0', 'p:OFFLINE_SEED_SALT=4'] patch=none
+  R000             fill= 43.8 cog= 53.0 stab= 22.8 place= 87.5 soft= 83.3 | comp= 58.1 packed=78.0% disp=0.148
+  == norm%=65.74 fill=43.81 cog=53.02 stab=22.83 place=87.50 soft=83.33 | COMPOSITE=58.10 packed=78.0%  [172s]

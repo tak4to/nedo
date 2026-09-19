@@ -1,0 +1,154 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 0: best=51.024  packed=60.0%  comp=53.97  below46=4  (2033s, total 0.56h)
+   W_LOW=417.3  W_BACK=183.8  W_FLAT=478.6  W_LEFT=153  W_MASS_HIGH=0.3718  W_ITEM_VOL=3575  SUPPORT_MIN_COVER=0.3363
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 1: best=51.856  packed=58.7%  comp=54.20  below46=4  (2107s, total 1.15h)
+   W_LOW=628  W_BACK=154.8  W_FLAT=687.5  W_LEFT=195  W_MASS_HIGH=0.5908  W_ITEM_VOL=2431  SUPPORT_MIN_COVER=0.5275
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 2: best=51.101  packed=56.5%  comp=54.96  below46=6  (2146s, total 1.75h)
+   W_LOW=170.3  W_BACK=206.9  W_FLAT=397.5  W_LEFT=165  W_MASS_HIGH=0.4419  W_ITEM_VOL=9457  SUPPORT_MIN_COVER=0.6298
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 3: best=52.539  packed=59.5%  comp=55.02  below46=3  (2202s, total 2.36h)
+   W_LOW=296.5  W_BACK=181.4  W_FLAT=492.7  W_LEFT=205  W_MASS_HIGH=0.3965  W_ITEM_VOL=620.7  SUPPORT_MIN_COVER=0.6832
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 4: best=51.961  packed=56.7%  comp=54.85  below46=4  (2200s, total 2.97h)
+   W_LOW=349.3  W_BACK=187.6  W_FLAT=422  W_LEFT=129.4  W_MASS_HIGH=0.3291  W_ITEM_VOL=1948  SUPPORT_MIN_COVER=0.7473
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 5: best=52.732  packed=61.2%  comp=54.84  below46=3  (2086s, total 3.55h)
+   W_LOW=255.5  W_BACK=229  W_FLAT=442.1  W_LEFT=152.2  W_MASS_HIGH=0.4976  W_ITEM_VOL=1604  SUPPORT_MIN_COVER=0.4489
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 6: best=51.853  packed=58.8%  comp=54.63  below46=4  (2152s, total 4.15h)
+   W_LOW=290  W_BACK=215  W_FLAT=482.7  W_LEFT=124.1  W_MASS_HIGH=0.317  W_ITEM_VOL=2447  SUPPORT_MIN_COVER=0.3894
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+gen 7: best=51.398  packed=59.3%  comp=53.79  below46=4  (2200s, total 4.76h)
+   W_LOW=323.2  W_BACK=222.9  W_FLAT=412.4  W_LEFT=127  W_MASS_HIGH=0.4147  W_ITEM_VOL=1956  SUPPORT_MIN_COVER=0.6622
+
+BEST OVERALL {
+ "W_LOW": 255.49078024761207,
+ "W_BACK": 229.00509424070626,
+ "W_FLAT": 442.1361319716724,
+ "W_LEFT": 152.216797173023,
+ "W_MASS_HIGH": 0.49760559885793376,
+ "W_ITEM_VOL": 1603.8408054233541,
+ "SUPPORT_MIN_COVER": 0.44888054722983606
+}
+  summary {
+ "fill": 33.38442432193527,
+ "cog_score": 53.903479159561705,
+ "stability_score": 23.56297020751337,
+ "placement_score": 84.40709897741148,
+ "soft_item_score": 78.92933891712433,
+ "composite": 54.83746231670923,
+ "packed": 61.15625,
+ "objective": 52.731855591434986,
+ "estlb40": 53.908678125395845,
+ "below40": 1,
+ "estlb46": 52.63946894636414,
+ "below46": 3,
+ "estlb50": 51.647419702544966,
+ "below50": 5
+}

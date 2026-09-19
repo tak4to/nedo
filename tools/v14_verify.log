@@ -1,0 +1,29 @@
+state=cem_full14.json  generations=8
+  best W_LOW                415.8   mean 354.99
+  best W_BACK               326.87   mean 342.27
+  best W_FLAT               1368.9   mean 1010.2
+  best W_LEFT               130.16   mean 127.66
+  best W_MASS_HIGH          0.50605   mean 0.53466
+  best W_ITEM_VOL           1351.2   mean 1209.6
+  best SUPPORT_MIN_COVER    0.62978   mean 0.64959
+  best W_WASTE              107.04   mean 279.95
+  best W_SUPPORT            222.17   mean 282.58
+  best W_WALL               67.088   mean 116.38
+  best W_SEAM               -332.72   mean -338.06
+  best W_CEIL               469.29   mean 322.93
+  best W_SOFT_DEFER         -269.02   mean -239.57
+  best W_PRIO_DEFER         481.4   mean 488.45
+
+pool                    baseline      best      mean      Δbest   Δmean   (smooth objective)
+k                          51.01     57.93     58.05      +6.92   +7.03
+ktest                      51.90     60.26     56.41      +8.35   +4.51
+shelftest                  45.39     53.16     51.36      +7.77   +5.97
+
+  未使用プール平均 Δsmooth_objective (best) = +7.68  (プール間 sd 0.72, n=3)
+  未使用プール平均 Δsmooth_objective (mean) = +5.84  (プール間 sd 1.27, n=3)
+
+実タスク（決定論的だが R001 は不安定シーン。単独で採否を決めないこと）
+  best  R000  comp=57.33  packed= 73.2%  fill=42.01
+  best  R001  comp=61.38  packed= 61.9%  fill=37.25
+  mean  R000  comp=60.04  packed= 73.2%  fill=42.01
+  mean  R001  comp=61.19  packed= 59.5%  fill=29.35

@@ -1,0 +1,4 @@
+pybullet build time: Aug 29 2026 17:03:42
+### V_new_s0  overrides=['p:ROLLOUT_SETTLE=1', 'p:OFFLINE_SEED_SALT=0'] patch=none
+  R000             fill= 34.1 cog= 53.0 stab= 11.7 place= 66.7 soft=100.0 | comp= 53.1 packed=68.3% disp=0.214
+  == norm%=51.17 fill=34.10 cog=53.05 stab=11.73 place=66.67 soft=100.00 | COMPOSITE=53.11 packed=68.3%  [173s]

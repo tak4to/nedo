@@ -1,0 +1,4 @@
+pybullet build time: Aug 29 2026 17:03:42
+### C_c0_s6  overrides=['p:OFFLINE_PREFIX_CACHE=0', 'p:OFFLINE_SEED_SALT=6'] patch=none
+  R000             fill= 45.0 cog= 51.7 stab= 33.3 place= 87.5 soft=100.0 | comp= 63.5 packed=78.0% disp=0.110
+  == norm%=67.47 fill=44.96 cog=51.65 stab=33.27 place=87.50 soft=100.00 | COMPOSITE=63.48 packed=78.0%  [176s]

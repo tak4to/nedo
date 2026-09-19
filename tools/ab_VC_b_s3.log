@@ -1,0 +1,22 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### VC_b_s3  overrides=['p:OFFLINE_TIEBREAK=0', 'p:OFFLINE_SEED_SALT=3'] patch=none
+  O00              fill= 44.2 cog= 53.5 stab= 25.6 place= 75.0 soft= 50.0 | comp= 49.7 packed=58.0% disp=0.136
+  O01              fill= 46.3 cog= 51.3 stab= 29.4 place=100.0 soft= 75.0 | comp= 60.4 packed=64.4% disp=0.123
+  O02              fill= 43.6 cog= 51.1 stab= 24.4 place= 85.7 soft=100.0 | comp= 61.0 packed=59.0% disp=0.141
+  O03              fill= 38.1 cog= 51.0 stab= 18.1 place= 92.3 soft= 83.3 | comp= 56.6 packed=73.8% disp=0.171
+  O04              fill= 36.5 cog= 49.5 stab= 33.8 place=100.0 soft= 75.0 | comp= 59.0 packed=60.0% disp=0.109
+  O05              fill= 39.1 cog= 48.1 stab= 18.9 place=100.0 soft=100.0 | comp= 61.2 packed=54.0% disp=0.167
+  O06              fill= 35.6 cog= 45.4 stab= 31.1 place= 50.0 soft=100.0 | comp= 52.4 packed=62.5% disp=0.117
+  O07              fill= 47.1 cog= 52.5 stab= 32.2 place= 83.3 soft= 83.3 | comp= 59.7 packed=74.0% disp=0.113
+  O08              fill= 42.6 cog= 53.6 stab= 30.2 place= 92.9 soft=100.0 | comp= 63.9 packed=60.0% disp=0.120
+  O09              fill= 48.2 cog= 50.9 stab= 33.7 place=100.0 soft= 87.5 | comp= 64.0 packed=64.0% disp=0.109
+  == norm%=55.61 fill=42.14 cog=50.70 stab=27.74 place=87.92 soft=85.42 | COMPOSITE=58.78 packed=63.0%  [107s]

@@ -1,0 +1,4 @@
+pybullet build time: Aug 29 2026 17:03:42
+### M_r1_s3  overrides=['p:OFFLINE_RESTARTS=1', 'p:OFFLINE_SEED_SALT=3'] patch=none
+  R000             fill= 41.9 cog= 52.2 stab= 26.0 place=100.0 soft=100.0 | comp= 64.0 packed=75.6% disp=0.135
+  == norm%=62.94 fill=41.94 cog=52.17 stab=25.97 place=100.00 soft=100.00 | COMPOSITE=64.02 packed=75.6%  [174s]
