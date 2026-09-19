@@ -1,0 +1,36 @@
+[
+ {
+  "scene": "R000",
+  "fill": 41.279258972352196,
+  "ceiling": 66.63659476748956,
+  "norm": 61.946831341524955,
+  "fill_loose": 54.0444963982814,
+  "n_in_strict": 26,
+  "n_in_loose": 33,
+  "packed": 33,
+  "total": 41,
+  "pct": 80.48780487804878,
+  "steps": 34,
+  "max_policy_s": 1.275929425999493,
+  "wall_s": 177.3766618569989,
+  "status": {
+   "is_included": true,
+   "is_valid": false,
+   "is_placed_safe": false
+  },
+  "cog_h": 0.7692536258912122,
+  "cog_score": 52.22027168377564,
+  "n_prio_buried": 0,
+  "n_soft_buried": 0,
+  "n_prio_wrong": 0,
+  "top_z": 1.5037331959293907,
+  "cog_z": 0.7692536258912122,
+  "placement_score": 100.0,
+  "soft_item_score": 100.0,
+  "n_prio_bad": 0,
+  "n_soft_bad": 0,
+  "stability_score": 23.764565412092008,
+  "shake_mean_disp": 0.14369745629779432,
+  "shake_n_moved": 24
+ }
+]

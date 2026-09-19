@@ -1,0 +1,35 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+12 scenes x 8 orders, judge=seq, settle=300
+
+scene     rho rollout  rho physics
+O00              0.64         0.74
+O01              0.90         0.98
+O02             -0.45         0.79
+O03              0.24         0.26
+O04              0.14        -0.33
+O05              0.64         0.33
+O06              0.36         0.76
+O07              0.64         0.86
+O08              0.86         0.79
+O09              0.40         0.48
+O10              0.33         0.00
+O11             -0.38        -0.31
+
+mean rho: rollout +0.361   physics +0.444
+
+mean true composite of the order returned:
+  random order                       58.94
+  rollout argmax (today)             61.81
+  physics judge over rollout top 3   61.60  (-0.21)
+  oracle over rollout top 3          63.28  (+1.47)

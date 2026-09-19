@@ -1,0 +1,4 @@
+pybullet build time: Aug 29 2026 17:03:42
+### R_tb1c0  overrides=['p:OFFLINE_TIEBREAK=1', 'p:OFFLINE_PREFIX_CACHE=0'] patch=none
+  R000             fill= 40.1 cog= 53.2 stab= 17.9 place=100.0 soft=100.0 | comp= 62.2 packed=70.7% disp=0.172
+  == norm%=60.17 fill=40.09 cog=53.16 stab=17.91 place=100.00 soft=100.00 | COMPOSITE=62.23 packed=70.7%  [160s]

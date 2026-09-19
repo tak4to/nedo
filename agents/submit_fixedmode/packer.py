@@ -49,7 +49,7 @@ WALL_HEIGHT_TOL = 0.035
 # 32-scene pool: cover 0.40 -> norm 23.6 but 12/32 episodes end with a
 # box toppling; 0.60 -> norm 24.1 with only 5 topples; 0.75 -> norm 21.4,
 # back to dying of "nothing fits". 0.60 is the measured optimum.
-SUPPORT_MIN_COVER = 0.60
+SUPPORT_MIN_COVER = 0.62978
 SUPPORT_CENTROID_TOL = 0.35
 
 # Clearance left above a support when resting flush would make the
@@ -139,8 +139,8 @@ MAX_VALIDATIONS = 60000
 # NB: these were fitted on two scenes only, and the greedy is sensitive
 # enough that small changes flip outcomes several points either way. Treat
 # them as a decent operating point, not a converged optimum.
-W_LOW = 400.0
-W_BACK = 200.0
+W_LOW = 415.8
+W_BACK = 326.87
 # Penalty per metre of the item's *vertical* extent, i.e. how strongly we
 # insist on laying items flat rather than standing them on end.
 #
@@ -152,7 +152,7 @@ W_BACK = 200.0
 # centre of mass (cog_score) and fall over when shaken (stability_score).
 # Measured over the 32-scene pool: 600 is worth +1.1 norm on its own and
 # +1.4 on top of the support-criterion fix, 16 scenes better and 8 worse.
-W_FLAT = 600.0
+W_FLAT = 1368.9
 # Preference for placing towards the left (small x). Not cosmetic: it is the
 # only thing that keeps the door-side notch band reachable.
 #
@@ -176,11 +176,11 @@ W_FLAT = 600.0
 # (-3.3, it starts overriding depth and height) -- but within 150-300 the
 # differences are inside the noise, so this is "enough left-preference to
 # reach the notch", not a converged optimum.
-W_LEFT = 150.0
-W_MASS_HIGH = 0.6
+W_LEFT = 130.16
+W_MASS_HIGH = 0.50605
 # Bonus per m^3 of item volume, applied only when the pool offers a
 # choice of which item to place next (see choose_action).
-W_ITEM_VOL = 3000.0
+W_ITEM_VOL = 1351.2
 # Bonus for landing a candidate's top flush with a height already used
 # elsewhere *in the same wall* (see _wall_local_tops).
 #
@@ -199,6 +199,113 @@ W_ITEM_VOL = 3000.0
 # all 7 scenes) -- that part is kept. Only this specific scoring use of
 # it is switched off. See docs/STRATEGY.md #13 for the full record.
 W_LEVEL_MATCH = 0.0
+
+# ---------------------------------------------------------------------------
+# Extra placement features, all shipping at weight 0.
+#
+# Every one of these encodes an idea that was tried on its own and lost --
+# heightmap minimisation, support ratio, wall contact, interlocking,
+# ceiling packing, deferring soft/priority items. Twenty-three such
+# single-term experiments went 0-for-23. That record is not evidence the
+# ideas are worthless; it is evidence that adding one term while holding
+# six hand-tuned weights fixed is the wrong experiment, because the
+# existing weights were fitted without it. Carrying them as *features*
+# instead lets tools/cem.py fit the whole vector jointly against the real
+# objective (composite through the item-count cliff), which no amount of
+# one-at-a-time testing can reach.
+#
+# At 0.0 the code below is a strict no-op: the guards skip the computation
+# entirely, so shipping this changes nothing until a weight is set.
+SEAM_TOL = 0.03          # edge alignment closer than this counts as a seam
+WALL_TOL = 0.03          # flush against a container bound within this
+W_WASTE = 107.04            # penalty per metre of mean void depth under the footprint
+W_SUPPORT = 222.17          # bonus per unit of footprint actually carried (0..1)
+W_WALL = 67.088             # bonus per container wall the item lands flush against
+W_SEAM = -332.72             # penalty when the item's edges line up with its support's
+W_CEIL = 469.29             # weight on the clearance left above the item
+W_SOFT_DEFER = -269.02       # pool-selection penalty for soft items
+W_PRIO_DEFER = 481.4       # pool-selection penalty for priority items
+WASTE_CELL = 0.03        # heightmap resolution for the waste feature
+
+
+def _waste_depths(cstate, cands):
+    """Mean void depth under each candidate's footprint, vectorised.
+
+    Wang & Hauser's heightmap-minimisation term. W_LOW already penalises a
+    high resting height but cannot tell apart an item sitting high on a
+    solid stack from one whose corner clips a neighbour so most of its
+    underside bridges air -- and the second is what traps volume. Measured
+    at the current operating point, 0.39-1.31 m3 per container sits in
+    voids below the skyline, which is why this is worth carrying as a
+    feature even though an earlier fixed-weight version of it lost (it was
+    measured when the free space was above the skyline, not below).
+
+    A summed-area table over a coarse heightmap makes each lookup O(1).
+    """
+    import numpy as np
+    g = cstate.geom
+    x0, x1 = g['x_lo'], g['x_hi']
+    y0, y1 = g['y_lo'], g['y_hi']
+    nx = max(int((x1 - x0) / WASTE_CELL) + 1, 1)
+    ny = max(int((y1 - y0) / WASTE_CELL) + 1, 1)
+    H = np.full((nx, ny), g['floor_struct_z'], dtype=np.float64)
+    for b in cstate.boxes + cstate.static_obstacles:
+        bcx, bcy, bcz = b['center']
+        bhx, bhy, bhz = b['half']
+        i0 = max(int((bcx - bhx - x0) / WASTE_CELL), 0)
+        i1 = min(int((bcx + bhx - x0) / WASTE_CELL) + 1, nx)
+        j0 = max(int((bcy - bhy - y0) / WASTE_CELL), 0)
+        j1 = min(int((bcy + bhy - y0) / WASTE_CELL) + 1, ny)
+        if i1 > i0 and j1 > j0:
+            np.maximum(H[i0:i1, j0:j1], bcz + bhz, out=H[i0:i1, j0:j1])
+    S = np.zeros((nx + 1, ny + 1), dtype=np.float64)
+    S[1:, 1:] = H.cumsum(0).cumsum(1)
+    cx = np.fromiter((c[1] for c in cands), float, len(cands))
+    cy = np.fromiter((c[2] for c in cands), float, len(cands))
+    hx = np.fromiter((c[4] for c in cands), float, len(cands))
+    hy = np.fromiter((c[5] for c in cands), float, len(cands))
+    hz = np.fromiter((c[6] for c in cands), float, len(cands))
+    cz = np.fromiter((c[3] for c in cands), float, len(cands))
+    i0 = np.clip(((cx - hx - x0) / WASTE_CELL).astype(np.int64), 0, nx - 1)
+    i1 = np.maximum(np.clip(((cx + hx - x0) / WASTE_CELL).astype(np.int64) + 1, 1, nx), i0 + 1)
+    j0 = np.clip(((cy - hy - y0) / WASTE_CELL).astype(np.int64), 0, ny - 1)
+    j1 = np.maximum(np.clip(((cy + hy - y0) / WASTE_CELL).astype(np.int64) + 1, 1, ny), j0 + 1)
+    tot = S[i1, j1] - S[i0, j1] - S[i1, j0] + S[i0, j0]
+    mean_h = tot / ((i1 - i0) * (j1 - j0))
+    return np.maximum((cz - hz) - mean_h, 0.0)
+
+
+def _shape_features(g, support, cx, cy, hx, hy, fx, fy, top):
+    """(support_frac, wall_contact, seam_align, ceil_gap) for one candidate.
+
+    All O(number of supporting boxes), which is small; nothing here walks
+    the full box list.
+    """
+    frac = 0.0
+    seam = 0.0
+    if support:
+        for b in support:
+            bc, bh = b['center'], b['half']
+            ox = min(cx + hx, bc[0] + bh[0]) - max(cx - hx, bc[0] - bh[0])
+            oy = min(cy + hy, bc[1] + bh[1]) - max(cy - hy, bc[1] - bh[1])
+            if ox > 0.0 and oy > 0.0:
+                frac += ox * oy
+            if (abs((cx - hx) - (bc[0] - bh[0])) < SEAM_TOL
+                    or abs((cx + hx) - (bc[0] + bh[0])) < SEAM_TOL
+                    or abs((cy - hy) - (bc[1] - bh[1])) < SEAM_TOL
+                    or abs((cy + hy) - (bc[1] + bh[1])) < SEAM_TOL):
+                seam = 1.0
+        frac = min(frac / (fx * fy), 1.0)
+    walls = 0
+    if cx - hx <= g['x_lo'] + WALL_TOL:
+        walls += 1
+    if cx + hx >= g['x_hi'] - WALL_TOL:
+        walls += 1
+    if cy + hy >= g['y_hi'] - WALL_TOL:
+        walls += 1
+    if cy - hy <= g['y_lo'] + WALL_TOL:
+        walls += 1
+    return frac, float(walls), seam, g['z_hi'] - top
 
 
 class ContainerState:
@@ -649,6 +756,10 @@ def _collect(cstate, item_spec, relax, xy_fn):
     # points of items placed on the large-pool set's non-shelf scenes).
     has_overhang = USE_UNDER_OVERHANG and any(b['half'][0] >= OVERHANG_MIN_HALF_X
                                               for b in cstate.static_obstacles)
+    # Both guards are checked once, up front: at the shipped weights of 0
+    # neither block runs at all, so the extra features cost nothing until
+    # something actually sets them.
+    use_shape = bool(W_SUPPORT or W_WALL or W_SEAM or W_CEIL)
 
     candidates = []
     for orn in ALL_ORNS:
@@ -674,6 +785,13 @@ def _collect(cstate, item_spec, relax, xy_fn):
             level_bonus = W_LEVEL_MATCH if any(abs(top - t) <= WALL_HEIGHT_TOL for t in local_tops) else 0.0
             score = (W_BACK * y_back - W_LOW * bottom - W_FLAT * fz - W_LEFT * x_left
                      - W_MASS_HIGH * mass * bottom + level_bonus)
+            if use_shape:
+                # NB: not `walls` -- that name holds _infer_walls' result,
+                # which xy_fn needs on every later iteration.
+                sfrac, wallc, seam, cgap = _shape_features(
+                    g, support, cx, cy, hx, hy, fx, fy, top)
+                score += (W_SUPPORT * sfrac + W_WALL * wallc
+                          - W_SEAM * seam - W_CEIL * cgap)
             candidates.append((score, cx, cy, bottom + hz, hx, hy, hz, orn, support, fx, fy))
     if has_overhang:
         for orn in ALL_ORNS:
@@ -698,6 +816,10 @@ def _collect(cstate, item_spec, relax, xy_fn):
                 score = (W_BACK * y_back - W_LOW * bottom - W_FLAT * fz - W_LEFT * x_left
                          - W_MASS_HIGH * mass * bottom)
                 candidates.append((score, cx, cy, bottom + hz, hx, hy, hz, orn, support, fx, fy))
+    if W_WASTE and candidates:
+        depths = _waste_depths(cstate, candidates)
+        candidates = [(c[0] - W_WASTE * float(d),) + c[1:]
+                      for c, d in zip(candidates, depths)]
     candidates.sort(key=lambda c: -c[0])
     return candidates
 
@@ -875,6 +997,15 @@ def choose_action(container_states, pool, time_deadline, relax=False, require_su
             pos, orn, score = result
             score += priority_bonus(spec, cstate.geom, any_priority_container)
             score += W_ITEM_VOL * spec['length'] * spec['width'] * spec['height']
+            # Deferral features. placement_score and soft_item_score penalise
+            # a priority/soft item with *anything* of another class above it
+            # in its column -- not merely resting on it -- so those items are
+            # only safe near the top of the load. choose_action is otherwise
+            # completely class-blind.
+            if W_SOFT_DEFER and spec.get('is_soft'):
+                score -= W_SOFT_DEFER
+            if W_PRIO_DEFER and spec.get('is_prioritized'):
+                score -= W_PRIO_DEFER
             if score > best_score:
                 best_score = score
                 best = (pool_idx, cidx, pos, orn)

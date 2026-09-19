@@ -1,0 +1,46 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### DOE_r08_s0  overrides=['p:W_LEVEL_MATCH=400.0', 'p:USE_UNDER_OVERHANG=0.0', 'p:SUPPORT_MIN_COVER=0.62978', 'p:SUPPORT_CENTROID_TOL=0.35', 'p:WALL_HEIGHT_TOL=0.035', 'p:SEAM_TOL=0.05', 'p:WASTE_CELL=0.02', 'p:TOP_TOL=0.02', 'p:OFFLINE_SEED_SALT=0'] patch=none
+  O00              fill= 41.4 cog= 52.4 stab= 41.4 place= 50.0 soft= 50.0 | comp= 47.0 packed=56.0% disp=0.088
+  O01              fill= 37.9 cog= 53.7 stab= 30.2 place= 75.0 soft=100.0 | comp= 59.4 packed=48.9% disp=0.120
+  O02              fill= 42.7 cog= 50.2 stab= 25.7 place= 78.6 soft= 92.9 | comp= 58.0 packed=64.0% disp=0.136
+  O03              fill= 42.3 cog= 51.6 stab= 22.1 place=100.0 soft=100.0 | comp= 63.2 packed=80.0% disp=0.151
+  O04              fill= 33.2 cog= 48.9 stab= 25.3 place=100.0 soft=100.0 | comp= 61.5 packed=65.0% disp=0.138
+  O05              fill= 34.2 cog= 51.7 stab= 21.2 place= 66.7 soft= 75.0 | comp= 49.7 packed=48.0% disp=0.155
+  O06              fill= 34.1 cog= 47.6 stab= 17.0 place= 50.0 soft=100.0 | comp= 49.8 packed=57.5% disp=0.177
+  O07              fill= 44.5 cog= 51.9 stab= 32.6 place= 87.5 soft=100.0 | comp= 63.3 packed=68.0% disp=0.112
+  O08              fill= 39.2 cog= 53.2 stab= 35.1 place=100.0 soft=100.0 | comp= 65.5 packed=53.3% disp=0.105
+  O09              fill= 48.9 cog= 49.6 stab= 35.7 place=100.0 soft=100.0 | comp= 66.9 packed=64.0% disp=0.103
+  O10              fill= 43.2 cog= 54.0 stab= 21.4 place= 75.0 soft=100.0 | comp= 58.7 packed=80.0% disp=0.154
+  O11              fill= 36.9 cog= 44.5 stab= 25.5 place=100.0 soft=100.0 | comp= 61.4 packed=57.5% disp=0.137
+  O12              fill= 43.5 cog= 52.2 stab= 21.6 place=100.0 soft=100.0 | comp= 63.5 packed=85.0% disp=0.153
+  O13              fill= 39.2 cog= 49.7 stab=  8.5 place= 75.0 soft= 75.0 | comp= 49.5 packed=72.5% disp=0.247
+  O14              fill= 45.2 cog= 49.7 stab= 27.9 place=100.0 soft=100.0 | comp= 64.6 packed=64.0% disp=0.128
+  O15              fill= 42.2 cog= 51.9 stab= 18.6 place=100.0 soft= 75.0 | comp= 57.5 packed=62.0% disp=0.168
+  O16              fill= 43.5 cog= 49.7 stab= 27.7 place=100.0 soft= 87.5 | comp= 61.7 packed=62.0% disp=0.128
+  O17              fill= 49.5 cog= 51.1 stab= 33.9 place= 90.0 soft= 71.4 | comp= 59.2 packed=70.0% disp=0.108
+  O18              fill= 42.3 cog= 50.3 stab= 25.5 place=100.0 soft=100.0 | comp= 63.6 packed=72.2% disp=0.137
+  O19              fill= 41.9 cog= 53.2 stab= 28.3 place=100.0 soft=100.0 | comp= 64.7 packed=56.0% disp=0.126
+  O20              fill= 39.4 cog= 44.1 stab= 32.7 place= 90.0 soft= 80.0 | comp= 57.2 packed=65.0% disp=0.112
+  O21              fill= 33.5 cog= 51.9 stab= 28.4 place=100.0 soft= 60.0 | comp= 54.8 packed=56.0% disp=0.126
+  O22              fill= 44.6 cog= 53.2 stab= 25.8 place=100.0 soft=100.0 | comp= 64.7 packed=80.0% disp=0.136
+  O23              fill= 47.3 cog= 51.2 stab= 32.8 place= 50.0 soft=100.0 | comp= 56.3 packed=92.5% disp=0.111
+  O24              fill= 31.1 cog= 47.4 stab= 26.8 place= 62.5 soft=100.0 | comp= 53.6 packed=44.0% disp=0.132
+  O25              fill= 34.8 cog= 53.7 stab= 30.6 place=100.0 soft=100.0 | comp= 63.8 packed=44.0% disp=0.118
+  O26              fill= 40.0 cog= 54.7 stab= 25.9 place= 66.7 soft= 75.0 | comp= 52.5 packed=72.5% disp=0.135
+  O27              fill= 41.8 cog= 54.6 stab= 23.7 place=100.0 soft=100.0 | comp= 64.0 packed=68.9% disp=0.144
+  O28              fill= 38.8 cog= 52.1 stab= 27.3 place=100.0 soft= 50.0 | comp= 53.6 packed=66.7% disp=0.130
+  O29              fill= 37.5 cog= 44.9 stab= 37.6 place= 75.0 soft= 90.0 | comp= 57.0 packed=60.0% disp=0.098
+  O30              fill= 36.9 cog= 47.0 stab= 31.4 place=100.0 soft=100.0 | comp= 63.1 packed=46.0% disp=0.116
+  O31              fill= 33.8 cog= 49.3 stab= 19.1 place= 50.0 soft=100.0 | comp= 50.4 packed=55.6% disp=0.165
+  == norm%=54.77 fill=40.17 cog=50.66 stab=27.11 place=85.68 soft=90.06 | COMPOSITE=58.73 packed=63.7%  [318s]

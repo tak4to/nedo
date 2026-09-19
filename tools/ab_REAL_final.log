@@ -1,0 +1,6 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### REAL_final  overrides=[] patch=none
+  R000             fill= 34.1 cog= 53.0 stab= 11.7 place= 66.7 soft=100.0 | comp= 53.1 packed=68.3% disp=0.214
+  R001             fill= 37.2 cog= 45.4 stab= 38.6 place=100.0 soft= 85.7 | comp= 61.4 packed=61.9% disp=0.095
+  == norm%=53.15 fill=35.67 cog=49.23 stab=25.14 place=83.33 soft=92.86 | COMPOSITE=57.25 packed=65.1%  [160s]

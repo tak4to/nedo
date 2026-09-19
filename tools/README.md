@@ -178,3 +178,42 @@ cd tools
 **ソフト荷物の `contactStiffness`/`contactDamping`/`linearDamping`**（無いと 5/12 しか当たらない）、
 重力 `-9.8`（`-9.81` ではない）、`deterministicOverlappingPairs=1`、
 扉側（外向き -Y）の平面には壁を立てないこと（開口部なので荷物は落ちる）。
+
+## 学習（CEM）ツール（2026-09-03）
+
+| ファイル | 用途 |
+| --- | --- |
+| `objective.py` | **真の目的関数**。5指標の合成値を「閾値の崖」を通して評価する。閾値未満のシーンは fill のみ、以上なら合成値。閾値の位置が不明なので 40/46/50% の平均を取る |
+| `cem.py` | スコア重みの CEM（交差エントロピー法）。`--params base7`（既存7重み）/ `full14`（+新特徴量7個） |
+| `cmpc.py` | **合成値**でのペア比較。閾値モデルでの推定LBと、跨いだ／落ちたシーン数も出す |
+| `scenes_real.json` | 実 config から生成した R000/R001。**妥当性の確認用** |
+
+```bash
+cd tools
+../.venv/bin/python cem.py --params base7 --pop 14 --gens 8 --jobs 14 --out cem_base7.json
+../.venv/bin/python cem.py --params full14 --pop 20 --gens 10 --jobs 14 --out cem_full14.json --resume
+../.venv/bin/python cmpc.py <baseline_tag> <new_tag>
+```
+
+**必ず合成値と積載率の両方を見ること。** 合成値は「積まない」ことでゲームできる
+（`SUPPORT_MIN_COVER=1.0` は合成値 60.7 だが積載率 31.7% で閾値割れ＝実際は fill のみの 13.6）。
+`cmpc.py` と `objective.py` はどちらもこれを織り込んでいる。
+
+## 単一シーンで採否を決めないこと（2026-09-03）
+
+`scenes_real.json` の **R001 は不安定シーン**である。集計上ほぼ完全に中立な変更
+（32シーン中3シーンのみ差、合成値 +0.20）でも積載率が 64.3% ⇄ 54.8% と10ポイント飛ぶ。
+**同一コードでは決定論的に再現するが、コードが1%変わると別の解に落ちる。**
+実タスクは妥当性の確認に使うが、**単独で採否を判定する材料にはならない。**
+
+- `probe_opt.py` — `optimize()` に計測カウンタを注入して1シーン走らせ、**オフライン探索が
+  実際に何をしているか**を出す。ロールアウト数 / 受理数 / 最後の改善時刻、目的値
+  `prefix_len` が取る値の数（プラトー幅）、incumbent との最長共通接頭辞（プレフィックス
+  キャッシュの上限）、**同じ prefix で並んだ解の cog のばらつき**（現行の tiebreaker
+  `prefix_volume` が捨てている量）。`agents/submit` は変更せず一時ディレクトリに複製して
+  パッチする。R000 実測は `docs/2026-09-08-オフライン最適化戦略.md`。
+
+  ```bash
+  ../.venv/bin/python probe_opt.py                    # R000、150秒フル
+  ../.venv/bin/python probe_opt.py --budget 12        # 短縮スモーク
+  ```

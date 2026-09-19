@@ -49,7 +49,7 @@ WALL_HEIGHT_TOL = 0.035
 # 32-scene pool: cover 0.40 -> norm 23.6 but 12/32 episodes end with a
 # box toppling; 0.60 -> norm 24.1 with only 5 topples; 0.75 -> norm 21.4,
 # back to dying of "nothing fits". 0.60 is the measured optimum.
-SUPPORT_MIN_COVER = 0.60
+SUPPORT_MIN_COVER = 0.62978
 SUPPORT_CENTROID_TOL = 0.35
 
 # Clearance left above a support when resting flush would make the
@@ -139,8 +139,8 @@ MAX_VALIDATIONS = 60000
 # NB: these were fitted on two scenes only, and the greedy is sensitive
 # enough that small changes flip outcomes several points either way. Treat
 # them as a decent operating point, not a converged optimum.
-W_LOW = 400.0
-W_BACK = 200.0
+W_LOW = 415.8
+W_BACK = 326.87
 # Penalty per metre of the item's *vertical* extent, i.e. how strongly we
 # insist on laying items flat rather than standing them on end.
 #
@@ -152,7 +152,7 @@ W_BACK = 200.0
 # centre of mass (cog_score) and fall over when shaken (stability_score).
 # Measured over the 32-scene pool: 600 is worth +1.1 norm on its own and
 # +1.4 on top of the support-criterion fix, 16 scenes better and 8 worse.
-W_FLAT = 600.0
+W_FLAT = 1368.9
 # Preference for placing towards the left (small x). Not cosmetic: it is the
 # only thing that keeps the door-side notch band reachable.
 #
@@ -176,11 +176,11 @@ W_FLAT = 600.0
 # (-3.3, it starts overriding depth and height) -- but within 150-300 the
 # differences are inside the noise, so this is "enough left-preference to
 # reach the notch", not a converged optimum.
-W_LEFT = 150.0
-W_MASS_HIGH = 0.6
+W_LEFT = 130.16
+W_MASS_HIGH = 0.50605
 # Bonus per m^3 of item volume, applied only when the pool offers a
 # choice of which item to place next (see choose_action).
-W_ITEM_VOL = 3000.0
+W_ITEM_VOL = 1351.2
 # Bonus for landing a candidate's top flush with a height already used
 # elsewhere *in the same wall* (see _wall_local_tops).
 #
@@ -199,6 +199,166 @@ W_ITEM_VOL = 3000.0
 # all 7 scenes) -- that part is kept. Only this specific scoring use of
 # it is switched off. See docs/STRATEGY.md #13 for the full record.
 W_LEVEL_MATCH = 0.0
+
+# ---------------------------------------------------------------------------
+# Extra placement features, all shipping at weight 0.
+#
+# Every one of these encodes an idea that was tried on its own and lost --
+# heightmap minimisation, support ratio, wall contact, interlocking,
+# ceiling packing, deferring soft/priority items. Twenty-three such
+# single-term experiments went 0-for-23. That record is not evidence the
+# ideas are worthless; it is evidence that adding one term while holding
+# six hand-tuned weights fixed is the wrong experiment, because the
+# existing weights were fitted without it. Carrying them as *features*
+# instead lets tools/cem.py fit the whole vector jointly against the real
+# objective (composite through the item-count cliff), which no amount of
+# one-at-a-time testing can reach.
+#
+# At 0.0 the code below is a strict no-op: the guards skip the computation
+# entirely, so shipping this changes nothing until a weight is set.
+SEAM_TOL = 0.03          # edge alignment closer than this counts as a seam
+WALL_TOL = 0.03          # flush against a container bound within this
+SIDE_TOL = 0.03          # face-to-face gap closer than this counts as side contact
+W_WASTE = 107.04            # penalty per metre of mean void depth under the footprint
+W_SUPPORT = 222.17          # bonus per unit of footprint actually carried (0..1)
+W_WALL = 67.088             # bonus per container wall the item lands flush against
+W_SEAM = -332.72             # penalty when the item's edges line up with its support's
+W_CEIL = 469.29             # weight on the clearance left above the item
+# Bonus per unit of side surface area touching a *neighbouring item* (not a
+# container wall -- that is W_WALL, and above 0.0 ships as a strict no-op
+# like the rest of this block).
+#
+# Added 2026-09-13 from a mechanism study, not a hunch: docs/2026-09-13-
+# survey戦略.md P2 instrumented 801 placed items (tools/mechanism_log.py)
+# with real settle-and-shake displacement and found this is the single
+# clearest lever measured so far -- larger than height in the stack, larger
+# than container-wall contact (which was flat across 0/1/2 walls: 0.132-
+# 0.142m disp), larger than floor contact (which only separates floor from
+# everything else, 0.009m vs 0.164m, and every item not on the floor still
+# needs *something* to hold it):
+#
+#   isolated (no side-adjacent item, <1cm^2 contact)   0.165m disp, 78% moved
+#   some side contact with a neighbour                 0.104m disp, 56% moved
+#
+# i.e. what keeps a non-floor item still under shake is not the container
+# wall, it's another item pressed against its side.
+W_SIDE = 0.0
+W_SOFT_DEFER = -269.02       # pool-selection penalty for soft items
+W_PRIO_DEFER = 481.4       # pool-selection penalty for priority items
+WASTE_CELL = 0.03        # heightmap resolution for the waste feature
+
+
+def _waste_depths(cstate, cands):
+    """Mean void depth under each candidate's footprint, vectorised.
+
+    Wang & Hauser's heightmap-minimisation term. W_LOW already penalises a
+    high resting height but cannot tell apart an item sitting high on a
+    solid stack from one whose corner clips a neighbour so most of its
+    underside bridges air -- and the second is what traps volume. Measured
+    at the current operating point, 0.39-1.31 m3 per container sits in
+    voids below the skyline, which is why this is worth carrying as a
+    feature even though an earlier fixed-weight version of it lost (it was
+    measured when the free space was above the skyline, not below).
+
+    A summed-area table over a coarse heightmap makes each lookup O(1).
+    """
+    import numpy as np
+    g = cstate.geom
+    x0, x1 = g['x_lo'], g['x_hi']
+    y0, y1 = g['y_lo'], g['y_hi']
+    nx = max(int((x1 - x0) / WASTE_CELL) + 1, 1)
+    ny = max(int((y1 - y0) / WASTE_CELL) + 1, 1)
+    H = np.full((nx, ny), g['floor_struct_z'], dtype=np.float64)
+    for b in cstate.boxes + cstate.static_obstacles:
+        bcx, bcy, bcz = b['center']
+        bhx, bhy, bhz = b['half']
+        i0 = max(int((bcx - bhx - x0) / WASTE_CELL), 0)
+        i1 = min(int((bcx + bhx - x0) / WASTE_CELL) + 1, nx)
+        j0 = max(int((bcy - bhy - y0) / WASTE_CELL), 0)
+        j1 = min(int((bcy + bhy - y0) / WASTE_CELL) + 1, ny)
+        if i1 > i0 and j1 > j0:
+            np.maximum(H[i0:i1, j0:j1], bcz + bhz, out=H[i0:i1, j0:j1])
+    S = np.zeros((nx + 1, ny + 1), dtype=np.float64)
+    S[1:, 1:] = H.cumsum(0).cumsum(1)
+    cx = np.fromiter((c[1] for c in cands), float, len(cands))
+    cy = np.fromiter((c[2] for c in cands), float, len(cands))
+    hx = np.fromiter((c[4] for c in cands), float, len(cands))
+    hy = np.fromiter((c[5] for c in cands), float, len(cands))
+    hz = np.fromiter((c[6] for c in cands), float, len(cands))
+    cz = np.fromiter((c[3] for c in cands), float, len(cands))
+    i0 = np.clip(((cx - hx - x0) / WASTE_CELL).astype(np.int64), 0, nx - 1)
+    i1 = np.maximum(np.clip(((cx + hx - x0) / WASTE_CELL).astype(np.int64) + 1, 1, nx), i0 + 1)
+    j0 = np.clip(((cy - hy - y0) / WASTE_CELL).astype(np.int64), 0, ny - 1)
+    j1 = np.maximum(np.clip(((cy + hy - y0) / WASTE_CELL).astype(np.int64) + 1, 1, ny), j0 + 1)
+    tot = S[i1, j1] - S[i0, j1] - S[i1, j0] + S[i0, j0]
+    mean_h = tot / ((i1 - i0) * (j1 - j0))
+    return np.maximum((cz - hz) - mean_h, 0.0)
+
+
+def _side_contact_frac(cstate, cx, cy, hx, hy, bottom, top, fx, fy, fz):
+    """Fraction (0..1) of this candidate's side surface touching a
+    *placed item* (not a container wall or shelf -- W_WALL already covers
+    walls, and docs/2026-09-13-survey戦略.md P2 found wall contact flat
+    across 0-2 walls while item-to-item contact was the strongest single
+    lever measured).
+
+    O(number of placed items); only called when W_SIDE != 0, so it costs
+    nothing at the shipped weight. cstate.static_obstacles is deliberately
+    excluded -- this is the same scope as the mechanism study that
+    motivated it.
+    """
+    area = 0.0
+    for b in cstate.boxes:
+        bc, bh = b['center'], b['half']
+        z_overlap = min(top, bc[2] + bh[2]) - max(bottom, bc[2] - bh[2])
+        if z_overlap <= 0.0:
+            continue
+        zc = min(z_overlap, fz)
+        if (abs((cx - hx) - (bc[0] + bh[0])) < SIDE_TOL
+                or abs((cx + hx) - (bc[0] - bh[0])) < SIDE_TOL):
+            oy = min(cy + hy, bc[1] + bh[1]) - max(cy - hy, bc[1] - bh[1])
+            if oy > 0.0:
+                area += oy * zc
+        if (abs((cy - hy) - (bc[1] + bh[1])) < SIDE_TOL
+                or abs((cy + hy) - (bc[1] - bh[1])) < SIDE_TOL):
+            ox = min(cx + hx, bc[0] + bh[0]) - max(cx - hx, bc[0] - bh[0])
+            if ox > 0.0:
+                area += ox * zc
+    total_side = 2.0 * (fx + fy) * fz
+    return min(area / total_side, 1.0) if total_side > 0.0 else 0.0
+
+
+def _shape_features(g, support, cx, cy, hx, hy, fx, fy, top):
+    """(support_frac, wall_contact, seam_align, ceil_gap) for one candidate.
+
+    All O(number of supporting boxes), which is small; nothing here walks
+    the full box list.
+    """
+    frac = 0.0
+    seam = 0.0
+    if support:
+        for b in support:
+            bc, bh = b['center'], b['half']
+            ox = min(cx + hx, bc[0] + bh[0]) - max(cx - hx, bc[0] - bh[0])
+            oy = min(cy + hy, bc[1] + bh[1]) - max(cy - hy, bc[1] - bh[1])
+            if ox > 0.0 and oy > 0.0:
+                frac += ox * oy
+            if (abs((cx - hx) - (bc[0] - bh[0])) < SEAM_TOL
+                    or abs((cx + hx) - (bc[0] + bh[0])) < SEAM_TOL
+                    or abs((cy - hy) - (bc[1] - bh[1])) < SEAM_TOL
+                    or abs((cy + hy) - (bc[1] + bh[1])) < SEAM_TOL):
+                seam = 1.0
+        frac = min(frac / (fx * fy), 1.0)
+    walls = 0
+    if cx - hx <= g['x_lo'] + WALL_TOL:
+        walls += 1
+    if cx + hx >= g['x_hi'] - WALL_TOL:
+        walls += 1
+    if cy + hy >= g['y_hi'] - WALL_TOL:
+        walls += 1
+    if cy - hy <= g['y_lo'] + WALL_TOL:
+        walls += 1
+    return frac, float(walls), seam, g['z_hi'] - top
 
 
 class ContainerState:
@@ -245,6 +405,24 @@ class ContainerState:
     def obstacle_boxes(self):
         return ([(b['center'], b['half']) for b in self.boxes] +
                 [(b['center'], b['half']) for b in self.static_obstacles])
+
+    def clone(self):
+        """A copy that can be committed to without disturbing this one.
+
+        `boxes` is the only field commit() mutates, and the derived views
+        (`floor_boxes`, `landing_index`) are rebuilt wholesale by _refresh
+        rather than edited in place -- so a clone can share them until it
+        commits something of its own. That makes a snapshot O(len(boxes))
+        with no re-sort, which is what makes it affordable for optimize()
+        to keep one per position along a rollout.
+        """
+        c = ContainerState.__new__(ContainerState)
+        c.geom = self.geom
+        c.boxes = list(self.boxes)
+        c.static_obstacles = self.static_obstacles
+        c.floor_boxes = self.floor_boxes
+        c.landing_index = self.landing_index
+        return c
 
     def commit(self, pos_local, half_ext, item_spec):
         self.boxes.append({
@@ -398,6 +576,78 @@ def _bottom_for_support(cgeom, support_top, support, half_z):
     if eff > SAFETY_MARGIN + 0.002:
         return support_top
     return support_top + SUPPORT_LIFT
+
+
+# Record settled heights, not design heights, inside optimize()'s rollout.
+#
+# _bottom_for_support deliberately floats some items SUPPORT_LIFT (0.030)
+# clear of whatever holds them up -- and FLOOR_LIFT (0.020) above the floor
+# -- because the transport sweep would otherwise clip the support. The
+# evaluator then drops the item and it settles flush. Measured over 637
+# accepted placements (tools/drift_fit.py): items move -0.0118 m on average
+# in z and essentially nothing in x or y, and the distribution is not noise
+# but two spikes -- 70% of rigid items do not move at all (they were placed
+# flush) and the rest sink by almost exactly 0.020 or 0.030.
+#
+# The rollout used to commit the design height and never move it, so every
+# later item in that column was stacked on a surface 2-3cm higher than the
+# one the real run offers, compounding up the stack. policy() must still
+# *ask* for the design height -- that is what makes the placement legal --
+# so this correction is only for the rollout's own bookkeeping.
+ROLLOUT_SETTLE = 1.0
+
+# Salt for optimize()'s ruin-and-recreate RNG. Ships at 0; the search is
+# seeded from the item indices so a scene always searches the same sequence.
+# Exists so that one scene's *sensitivity* can be measured -- running the
+# same configuration under several salts says how much of a single-scene
+# result is the change and how much is which local optimum the walk fell
+# into. Without it a real task, of which there is exactly one in offline
+# mode, cannot be told apart from a coin flip.
+OFFLINE_SEED_SALT = 0.0
+
+# How many independent ruin-and-recreate walks optimize() runs, sharing one
+# global record.
+#
+# The walk's outcome is a lottery. Running the same configuration on the one
+# real offline task under eight different search seeds spreads composite
+# over 54.9 to 64.9 (sd 2.96) and items placed over 11.1 percentage points
+# -- so which local optimum the walk happens to fall into matters more than
+# most of the changes measured against it, and a single walk banks whichever
+# one it drew. That is also what the search has spare budget for: with a
+# single walk the record typically stops improving in the first tens of
+# seconds and the remaining ~140s of the 150s budget changes nothing.
+#
+# Restarting converts the lottery into a maximum -- of the *objective*.
+#
+# MEASURED AND TURNED OFF. Eight walks against one, over eight search seeds
+# on R000: composite -0.32 (se 2.48, 4W/4L), and the spread across seeds
+# went up rather than down (sd 3.68 -> 4.70).
+#
+# This is the fourth thing that spends more of the budget and does not pay
+# (record-to-record travel, the prefix cache, and simply searching longer
+# were the others), and they all fail for one reason. The rollout ranks two
+# arrival orders for the same scene at Spearman +0.49 on composite
+# (tools/order_fidelity.py). Taking the best of N candidates under a ranking
+# that noisy selects the order whose rollout score is most optimistically
+# wrong about as fast as it selects a genuinely better one -- the winner's
+# curse grows with N alongside the true maximum, so the net is nil and the
+# variance rises.
+#
+# The corollary is worth stating, because it decides what to try next: no
+# amount of extra search buys anything at this fidelity. The two changes
+# that did pay both improved the *ranking* rather than the number of
+# candidates ranked -- OFFLINE_TIEBREAK changed what the objective measures,
+# ROLLOUT_SETTLE made the simulated state match the real one. Beam search,
+# ALNS operator tuning and BRKGA are all "more candidates" and should wait
+# until the rollout ranks at 0.7-0.8.
+OFFLINE_RESTARTS = 1.0
+
+
+def settled_center_z(cstate, cx, cy, half):
+    """Centre height an item placed at (cx, cy) will settle to: flush on
+    whatever _landing says is underneath it."""
+    top, _ = _landing(cstate, cx, cy, half[0], half[1])
+    return top + half[2]
 
 
 def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
@@ -649,6 +899,11 @@ def _collect(cstate, item_spec, relax, xy_fn):
     # points of items placed on the large-pool set's non-shelf scenes).
     has_overhang = USE_UNDER_OVERHANG and any(b['half'][0] >= OVERHANG_MIN_HALF_X
                                               for b in cstate.static_obstacles)
+    # Both guards are checked once, up front: at the shipped weights of 0
+    # neither block runs at all, so the extra features cost nothing until
+    # something actually sets them.
+    use_shape = bool(W_SUPPORT or W_WALL or W_SEAM or W_CEIL)
+    use_side = bool(W_SIDE)  # separate gate: O(n_boxes), not O(n_support)
 
     candidates = []
     for orn in ALL_ORNS:
@@ -674,6 +929,16 @@ def _collect(cstate, item_spec, relax, xy_fn):
             level_bonus = W_LEVEL_MATCH if any(abs(top - t) <= WALL_HEIGHT_TOL for t in local_tops) else 0.0
             score = (W_BACK * y_back - W_LOW * bottom - W_FLAT * fz - W_LEFT * x_left
                      - W_MASS_HIGH * mass * bottom + level_bonus)
+            if use_shape:
+                # NB: not `walls` -- that name holds _infer_walls' result,
+                # which xy_fn needs on every later iteration.
+                sfrac, wallc, seam, cgap = _shape_features(
+                    g, support, cx, cy, hx, hy, fx, fy, top)
+                score += (W_SUPPORT * sfrac + W_WALL * wallc
+                          - W_SEAM * seam - W_CEIL * cgap)
+            if use_side:
+                score += W_SIDE * _side_contact_frac(
+                    cstate, cx, cy, hx, hy, bottom, top, fx, fy, fz)
             candidates.append((score, cx, cy, bottom + hz, hx, hy, hz, orn, support, fx, fy))
     if has_overhang:
         for orn in ALL_ORNS:
@@ -698,6 +963,10 @@ def _collect(cstate, item_spec, relax, xy_fn):
                 score = (W_BACK * y_back - W_LOW * bottom - W_FLAT * fz - W_LEFT * x_left
                          - W_MASS_HIGH * mass * bottom)
                 candidates.append((score, cx, cy, bottom + hz, hx, hy, hz, orn, support, fx, fy))
+    if W_WASTE and candidates:
+        depths = _waste_depths(cstate, candidates)
+        candidates = [(c[0] - W_WASTE * float(d),) + c[1:]
+                      for c, d in zip(candidates, depths)]
     candidates.sort(key=lambda c: -c[0])
     return candidates
 
@@ -839,6 +1108,192 @@ def priority_bonus(item_spec, cgeom, any_priority_container):
 MIN_CALL_BUDGET = 0.8
 
 
+# --- Offline search objective (used by agent.optimize's rollout) ---------
+#
+# What a candidate arrival order is worth. Until 2026-09-08 this was
+# (items placed, volume placed): the search maximised *count and fill*.
+# Three leaderboard observations say that is the wrong quantity --
+#
+#   B -> C moved fill +16.6 and items placed +26.5pt and the leaderboard
+#   +1.72. Everything the old objective measures is saturated; the only
+#   metrics with room left are stability and cog.
+#
+# -- and the volume tiebreak is not merely inert, it points the wrong way:
+# ranking ties by "most volume placed" prefers putting the big boxes down
+# first, which stacks higher, which lowers cog.
+#
+# Measured on R000 at the full 150s budget (tools/probe_opt.py): the search
+# visits 214 orders that all place 30 items, their cog spans 48.45 to
+# 53.05, and the volume tiebreak hands back the 49.08 one. Ranking those
+# same 214 by the composite instead is worth +3.97 cog for free.
+#
+# The count stays the *primary* key (agent.py builds the tuple), so this
+# only ever decides ties -- an order can never be preferred for placing
+# fewer items, which is what keeps the scoring cliff out of reach.
+#
+# Measured over 64 offline scenes (optimize=True, look_ahead=1) against the
+# volume tiebreak: composite +1.68 (se 0.63, 38W/25L) with items placed
+# unchanged (+0.01pt), and +1.58 (se 0.60, 38W/26L) on a seed-separated
+# holdout -- so the gain transfers rather than being a fit to the pool. The
+# gain is not where it was predicted: cog moved +0.03, and it came from
+# placement (+5.91) and soft (+3.55). Arrival order decides what ends up
+# stacked on a priority or soft item, and the volume tiebreak was blind to
+# it.
+OFFLINE_TIEBREAK = 1.0      # 1 = composite proxy, 0 = the pre-2026-09-08 volume
+
+# Record-to-record travel, the acceptance rule for the ruin-and-recreate
+# phase. Santini, Ropke & Hvattum (J. Heuristics 2018) rank SA, threshold
+# acceptance and RRT as the top group for ALNS, with RRT undominated;
+# accepting only strict improvements -- what optimize() did until now --
+# is not in the comparison at all. It showed: on R000, 820 rollouts
+# produced 4 accepted moves, the last at t=9.7s of 150.
+#
+# A candidate becomes the search's current position when
+#   items * RRT_ITEM_WORTH + composite  >=  the same for the record  - RRT_DEV.
+#
+# MEASURED AND TURNED OFF. At RRT_DEV = 1.0 -- just under the composite
+# spread observed within one count level -- it costs 0.68 composite against
+# the same configuration with RRT_DEV = 0 (64 offline scenes, se 0.55,
+# 32W/31L, and 0.49pt fewer items placed). The freeze it was built to fix is
+# real, but crossing the plateau is not what the search was short of: once
+# the objective could tell plateau solutions apart (OFFLINE_TIEBREAK), a
+# strict-improvement walk found them on its own, and letting the walk drift
+# downhill only cost placements.
+#
+# Left switchable rather than deleted, because the acceptance rule is worth
+# revisiting if the objective changes again.
+RRT_DEV = 0.0
+RRT_ITEM_WORTH = 10.0
+
+# Reuse the simulated prefix a trial shares with the order it came from.
+# Ruin-and-recreate moves items around inside an order, so consecutive
+# trials agree on a long head -- measured on R000, 64% of the items and 60%
+# of a rollout's wall time -- and re-simulating it buys nothing. This is
+# exactly semantics-preserving (tools/check_resume.py re-runs every resumed
+# rollout from scratch and compares key, order and plan); all it buys is
+# rollouts.
+#
+# MEASURED AND TURNED OFF. The prefix really is 64% of the items and 60% of
+# a rollout's time, and the extra rollouts are real, but they do not buy a
+# better answer:
+#
+#   64 offline scenes, old objective   composite -0.64 (se 0.52, 12W/20L)
+#   64 offline scenes, new objective   composite +0.42 (se 0.39, 21W/18L)
+#   real task R000, old objective      58.9 -> 58.9  (identical order)
+#   real task R000, new objective      62.2 -> 55.8
+#
+# Neither pool result clears its own standard error, and re-measured over
+# eight search seeds on R000 it is +0.14 (se 0.51, 3W/2L, three seeds
+# byte-identical) -- neutral. It was briefly turned off as *harmful* on the
+# strength of one R000 run showing -6.4; that was one draw from a scene
+# whose own spread across seeds is sd 2.96 composite, so it said nothing.
+# See OFFLINE_SEED_SALT.
+#
+# It stays off because nothing argues for it, not because it hurts: a pure
+# budget optimisation has no mechanism by which it improves the *answer*,
+# it only moves the search elsewhere in the plateau, and off is the simpler
+# behaviour. Worth revisiting whenever the rollout gets closer still to the
+# run it predicts -- extra rollouts are worth more the better it ranks.
+OFFLINE_PREFIX_CACHE = 0.0
+
+
+def usable_volume(g):
+    """Container.volume, replicated from src/ground_handling/containers.py.
+
+    The observation dict does carry 'volume', but container_geometry does
+    not keep it and the policy's observation is not guaranteed to, so it is
+    rederived from the same seven numbers the evaluator uses.
+    """
+    il = g['length'] - 2.0 * g['thickness']
+    iw = g['width'] - 2.0 * g['thickness']
+    ih = g['height'] - g['thickness'] - g['buffer']
+    vol = il * iw * ih
+    vol -= 0.5 * (g['cut_x'] - g['thickness']) * (g['cut_y'] - g['thickness']) * iw
+    vol -= g['cut_x'] * g['thickness'] * iw
+    if g['has_shelf']:
+        vol -= il * g['thickness'] * (g['width'] / 2.0 - 2.0 * g['thickness'])
+    return max(vol, 1e-9)
+
+
+def _class_score(boxes, attr, check_container):
+    """placement_score / soft_item_score, mirroring tools/scores.py.
+
+    A member of the class is penalised once when an item of the *other*
+    class rests on top of it (same-class stacking is free), and once more,
+    for priority items only, when it sits in a container that is not the
+    designated priority one.
+    """
+    members = [(cs, b) for cs, b in boxes if b[attr]]
+    if not members:
+        return 100.0
+    bad = 0
+    for cs, b in members:
+        top = b['center'][2] + b['half'][2]
+        for ocs, o in boxes:
+            if o is b or ocs is not cs or o[attr] == b[attr]:
+                continue
+            if o['center'][2] - o['half'][2] < top - 0.02:
+                continue
+            if (abs(o['center'][0] - b['center'][0]) < o['half'][0] + b['half'][0] and
+                    abs(o['center'][1] - b['center'][1]) < o['half'][1] + b['half'][1]):
+                bad += 1
+                break
+    wrong = 0
+    if check_container:
+        wrong = sum(1 for cs, b in members if not cs.geom['is_prioritized'])
+    return 100.0 * (1.0 - (bad + wrong) / (2.0 * len(members)))
+
+
+def pack_metrics(states):
+    """The four scored metrics a rollout can work out for itself.
+
+    fill, cog, placement and soft are deterministic functions of which box
+    ended up where, and a rollout's ContainerStates already carry every
+    input (centre, half extents, mass, is_soft, is_prioritized). Only
+    stability needs physics, so it is not in here; the return value is the
+    mean of the four, which is a monotone stand-in for the composite for
+    the purpose of ranking two orders.
+
+    One deliberate departure from the evaluator, on fill: official
+    fill_score counts an item only when all eight corners clear every plane
+    by 5mm (evaluator.calculate_fill_rate runs at inclusion_margin -0.005),
+    and a box resting on the floor never can -- its underside sits at
+    exactly `thickness`. Measured: 0 of 19 floor-contact items counted
+    against 87 of 94 stacked ones (docs/WORKLOG.md Day 4c). So the floor
+    layer is excluded rather than credited with volume it will not score.
+    """
+    denom = 0.0
+    counted_vol = 0.0
+    mass = 0.0
+    moment = 0.0
+    height = 0.0
+    any_prio_c = False
+    boxes = []
+    for cs in states.values():
+        g = cs.geom
+        denom += usable_volume(g)
+        if g['height'] > height:
+            height = g['height']
+        any_prio_c = any_prio_c or g['is_prioritized']
+        floor = {id(b) for b in cs.floor_boxes}
+        for b in cs.boxes:
+            hx, hy, hz = b['half']
+            if id(b) not in floor:
+                counted_vol += 8.0 * hx * hy * hz
+            m = b['mass']
+            mass += m
+            moment += m * b['center'][2]
+            boxes.append((cs, b))
+    if not boxes:
+        return 0.0
+    fill = min(100.0 * counted_vol / denom, 100.0)
+    cog = (max(0.0, min(100.0, 100.0 * (1.0 - (moment / mass) / height)))
+           if mass > 0.0 and height > 0.0 else 0.0)
+    return (fill + cog
+            + _class_score(boxes, 'is_prioritized', any_prio_c)
+            + _class_score(boxes, 'is_soft', False)) / 4.0
+
+
 def choose_action(container_states, pool, time_deadline, relax=False, require_support=True,
                   verifier=None):
     """Returns (pool_idx, container_idx, pos_local, orn_idx) or None.
@@ -875,6 +1330,15 @@ def choose_action(container_states, pool, time_deadline, relax=False, require_su
             pos, orn, score = result
             score += priority_bonus(spec, cstate.geom, any_priority_container)
             score += W_ITEM_VOL * spec['length'] * spec['width'] * spec['height']
+            # Deferral features. placement_score and soft_item_score penalise
+            # a priority/soft item with *anything* of another class above it
+            # in its column -- not merely resting on it -- so those items are
+            # only safe near the top of the load. choose_action is otherwise
+            # completely class-blind.
+            if W_SOFT_DEFER and spec.get('is_soft'):
+                score -= W_SOFT_DEFER
+            if W_PRIO_DEFER and spec.get('is_prioritized'):
+                score -= W_PRIO_DEFER
             if score > best_score:
                 best_score = score
                 best = (pool_idx, cidx, pos, orn)

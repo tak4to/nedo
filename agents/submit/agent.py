@@ -35,6 +35,7 @@ if _THIS_DIR not in sys.path:
 import numpy as np  # noqa: E402
 
 import geometry  # noqa: E402
+import packer  # noqa: E402
 from packer import ContainerState, best_placement, choose_action  # noqa: E402
 
 # How optimize() spends its 180s. Kept as an explicit switch because the
@@ -101,6 +102,26 @@ def _item_spec(d, pool_index=None):
         'is_prioritized': bool(d.get('is_prioritized', False)),
         'is_soft': bool(d.get('is_soft', False)),
     }
+
+
+def _tiebreak(states):
+    """Rank two arrival orders that placed the same number of items.
+
+    Which is nearly all of them: optimize()'s primary key is a count, so
+    over a 41! space the objective is mostly plateau, and this function
+    decides where inside it the search settles.
+
+    packer.pack_metrics scores the terminal state on four of the five
+    metrics the leaderboard pays for. The alternative branch is what the
+    search used until 2026-09-08 -- total volume placed -- kept switchable
+    so the change can be A/B'd with `ab.py --set p:OFFLINE_TIEBREAK=0`.
+    Volume is not a neutral tiebreak: it prefers the big boxes going down
+    first, which stacks higher, which costs cog.
+    """
+    if packer.OFFLINE_TIEBREAK:
+        return packer.pack_metrics(states)
+    return sum(8.0 * b['half'][0] * b['half'][1] * b['half'][2]
+               for cs in states.values() for b in cs.boxes)
 
 
 def _fallback_action(observation, deadline=None, twins=None, pool_list_raw=None):
@@ -258,6 +279,7 @@ class Agent:
             containers = self._known_containers
             if not containers:
                 return all_indices
+            any_priority_container = any(c.get('is_prioritized') for c in containers)
 
             def sort_key_volume(s):
                 return (1 if s['is_soft'] else 0, -(s['length'] * s['width'] * s['height']))
@@ -292,7 +314,7 @@ class Agent:
                             -(wv * vol + wf * foot + wh * s['height'] + wm * s['mass']))
                 return key
 
-            def rollout(trial_specs, budget_deadline):
+            def rollout(trial_specs, budget_deadline, resume=None):
                 """Greedy rollout of one arrival order, stopped where the real
                 episode would stop.
 
@@ -321,15 +343,52 @@ class Agent:
                 A lookahead pool of k lets the real run step over k-1 awkward
                 items before it is truly stuck, so that many deferrals are
                 allowed before stopping.
+
+                *Ties*: prefix length is an integer over a 41! search space,
+                so it is mostly plateau -- 820 rollouts on R000 touched only
+                twelve distinct values of it. What breaks the tie therefore
+                decides most of the search, and it is scored by
+                packer.pack_metrics: the composite the leaderboard actually
+                pays for, not the volume the old tiebreak preferred. See the
+                note above OFFLINE_TIEBREAK in packer.py.
+
+                *Resuming*: ruin-and-recreate only ever moves items around
+                inside one order, so a trial and the order it was derived
+                from agree on a long prefix -- measured on R000, 64% of the
+                items and 60% of the wall time. Simulating that prefix again
+                is pure waste, so a rollout hands back a trail (its state
+                just before each item) and the next one can be told to pick
+                up from position `start` of it. ToP (arXiv 2504.04421) caches
+                shared search paths for the same reason and reports decision
+                time nearly halving.
+
+                `resume` is (start, trail). Every entry is cloned on the way
+                in, so a resumed rollout cannot write through to the trail it
+                started from and the trail stays reusable.
                 """
                 allowed_misses = max(1, int(self._lookahead_k or 1))
-                states = {c['index']: ContainerState(c) for c in containers}
-                ordered, deferred = [], []
-                plan = {}
-                prefix_volume = 0.0
-                misses = 0
+                if resume is not None:
+                    start, base_trail = resume
+                    snap_states, snap_ordered, snap_deferred, snap_plan, misses = \
+                        base_trail[start]
+                    states = {k: v.clone() for k, v in snap_states.items()}
+                    ordered, deferred = list(snap_ordered), list(snap_deferred)
+                    plan = dict(snap_plan)
+                    trail = list(base_trail[:start])
+                else:
+                    start = 0
+                    states = {c['index']: ContainerState(c) for c in containers}
+                    ordered, deferred = [], []
+                    plan = {}
+                    misses = 0
+                    trail = []
+                keep_trail = bool(packer.OFFLINE_PREFIX_CACHE)
                 stopped_at = None
-                for pos_i, spec in enumerate(trial_specs):
+                for pos_i in range(start, len(trial_specs)):
+                    spec = trial_specs[pos_i]
+                    if keep_trail:
+                        trail.append(({k: v.clone() for k, v in states.items()},
+                                      list(ordered), list(deferred), dict(plan), misses))
                     if time.perf_counter() > budget_deadline:
                         stopped_at = pos_i
                         break
@@ -347,6 +406,26 @@ class Agent:
                             if result is None:
                                 continue
                             pos, orn, score = result
+                            # ...and mirror what choose_action adds on top of
+                            # best_placement's score, or the rollout picks a
+                            # different container than the run it is
+                            # predicting. priority_bonus is the one that
+                            # actually bites here: it is the only term that
+                            # varies across containers for a fixed item, and
+                            # it is worth +300/-600, which dominates
+                            # everything else in the score. The rest are
+                            # constant per item, so they cannot change this
+                            # argmax -- they are here so the two scoring
+                            # paths stay visibly identical, since the bug was
+                            # exactly that they drifted apart.
+                            score += packer.priority_bonus(spec, cstate.geom,
+                                                           any_priority_container)
+                            score += packer.W_ITEM_VOL * (spec['length'] * spec['width']
+                                                          * spec['height'])
+                            if packer.W_SOFT_DEFER and spec.get('is_soft'):
+                                score -= packer.W_SOFT_DEFER
+                            if packer.W_PRIO_DEFER and spec.get('is_prioritized'):
+                                score -= packer.W_PRIO_DEFER
                             if score > best_score:
                                 best_score = score
                                 best = (cidx, pos, orn)
@@ -361,13 +440,22 @@ class Agent:
                         continue
                     cidx, pos, orn = best
                     half = geometry.half_extents(spec['length'], spec['width'], spec['height'], orn)
+                    if packer.ROLLOUT_SETTLE:
+                        # The evaluator drops the item and it settles flush;
+                        # keeping the design height here is what made the
+                        # rollout rank orders at Spearman +0.27 within a
+                        # scene (tools/order_fidelity.py). Never raise the
+                        # item, only let it fall.
+                        pos = (pos[0], pos[1],
+                               min(pos[2], packer.settled_center_z(states[cidx], pos[0],
+                                                                   pos[1], half)))
                     states[cidx].commit(pos, half, spec)
                     ordered.append(spec['index'])
                     plan[spec['index']] = (cidx, pos[0], pos[1], orn)
-                    prefix_volume += spec['length'] * spec['width'] * spec['height']
                 tail = ([s['index'] for s in trial_specs[stopped_at:]]
                         if stopped_at is not None else [])
-                return (len(ordered), prefix_volume), ordered + deferred + tail, plan
+                return ((len(ordered), _tiebreak(states)),
+                        ordered + deferred + tail, plan, trail)
 
             def specs_of(order):
                 return [by_index[i] for i in order]
@@ -377,13 +465,53 @@ class Agent:
             best_key = (-1, -1.0)
             best_order = list(all_indices)
             best_plan = {}
+            # Where the *walk* currently stands, which is what ruin and
+            # recreate perturbs. Held apart from the record: `best_*` only
+            # ever improves and is what optimize() returns, while `cur_*` is
+            # allowed to step sideways so the search can cross the plateau.
+            cur_key, cur_order = best_key, best_order
+            # The rollout trail we can resume from, and the *input* order it
+            # was produced for. Those differ when a rollout defers an item
+            # (only possible when the lookahead pool holds more than one), so
+            # the trail is matched against the order it was built from rather
+            # than against cur_order.
+            cur_trail, cur_trail_order = [], []
 
-            def offer(key, order, plan):
-                nonlocal best_key, best_order, best_plan
-                if key > best_key:
+            def merit(key):
+                return key[0] * packer.RRT_ITEM_WORTH + key[1]
+
+            def resume_for(order):
+                """Where `order` stops agreeing with the trail we are holding.
+
+                Returns a `resume` argument for rollout(), or None when there
+                is nothing worth reusing.
+                """
+                if not cur_trail or not packer.OFFLINE_PREFIX_CACHE:
+                    return None
+                n = 0
+                for a, b in zip(order, cur_trail_order):
+                    if a != b:
+                        break
+                    n += 1
+                n = min(n, len(cur_trail) - 1)
+                return (n, cur_trail) if n > 0 else None
+
+            def offer(key, order, plan, t_order=None, trail=None):
+                nonlocal best_key, best_order, best_plan, cur_key, cur_order
+                nonlocal cur_trail, cur_trail_order
+                improved = key > best_key
+                if improved:
                     best_key, best_order, best_plan = key, order, plan
-                    return True
-                return False
+                # Record-to-record travel. Accepting only strict improvements
+                # -- what this did until 2026-09-08 -- froze the search: 820
+                # rollouts on R000 produced four accepted moves, the last at
+                # t=9.7s of a 150s budget, so 140s of ruin and recreate ran
+                # against an incumbent it could never leave.
+                if merit(key) >= merit(best_key) - packer.RRT_DEV:
+                    cur_key, cur_order = key, order
+                    if trail:
+                        cur_trail, cur_trail_order = trail, t_order
+                return improved
 
             # 1. Fixed heuristics, each on an even share of a modest opening
             #    slice. Bounds the worst case if every rollout is slow, and
@@ -397,20 +525,30 @@ class Agent:
                 t0 = time.perf_counter()
                 per_trial = min(deadline, t0 + max(opening_end - t0, 0.0) / max(n_left, 1))
                 n_left -= 1
-                key, order, plan = rollout(sorted(specs, key=key_fn), per_trial)
+                trial_specs = sorted(specs, key=key_fn)
+                key, order, plan, trail = rollout(trial_specs, per_trial,
+                                                  resume_for([s['index'] for s in trial_specs]))
                 trial_times.append(time.perf_counter() - t0)
-                offer(key, order, plan)
+                offer(key, order, plan, [s['index'] for s in trial_specs], trail)
 
             avg_trial = (sum(trial_times) / len(trial_times)) if trial_times else 0.5
-            rng = random.Random(sum(s['index'] for s in specs) * 2654435761 % (2 ** 32))
+            rng = random.Random((sum(s['index'] for s in specs) * 2654435761
+                                 + int(packer.OFFLINE_SEED_SALT) * 40503) % (2 ** 32))
 
-            def run_trial(trial_specs):
-                nonlocal avg_trial
+            def run_trial(trial_specs, adopt=False):
+                """Score one arrival order. `adopt` moves the walk onto it
+                whatever it scored, which is what makes a restart a restart
+                rather than a single trial the record then discards."""
+                nonlocal avg_trial, cur_key, cur_order
+                t_order = [s['index'] for s in trial_specs]
                 t0 = time.perf_counter()
-                key, order, plan = rollout(trial_specs, deadline)
+                key, order, plan, trail = rollout(trial_specs, deadline, resume_for(t_order))
                 trial_times.append(time.perf_counter() - t0)
                 avg_trial = sum(trial_times) / len(trial_times)
-                return offer(key, order, plan)
+                acc = offer(key, order, plan, t_order, trail)
+                if adopt:
+                    cur_key, cur_order = key, order
+                return acc
 
             # 2. GRASP diversification: a handful of randomized sort keys, to
             #    give ruin-and-recreate a decent incumbent to work from
@@ -426,11 +564,28 @@ class Agent:
             #    items the incumbent could not place at all, which get
             #    reinserted early where there is still room for them.
             n_items = len(specs)
+            # Restart schedule. `best_*` is global and monotone, so a restart
+            # can only ever add; all it resets is where the walk stands.
+            lns_start = time.perf_counter()
+            lns_span = max(deadline - lns_start, 0.0)
+            n_restarts = max(1, int(packer.OFFLINE_RESTARTS))
+            restart_i = 0
             while (OFFLINE_SEARCH == 'lns' and n_items > 2
                    and deadline - time.perf_counter() > avg_trial * 1.15):
-                order = list(best_order)
+                if (restart_i + 1 < n_restarts
+                        and time.perf_counter() - lns_start
+                        > lns_span * (restart_i + 1) / n_restarts):
+                    # Next slice: drop the walk somewhere else in the space.
+                    # A randomized sort key, not a random permutation --
+                    # arrival orders that ignore item shape entirely are so
+                    # far off that the walk spends the whole slice climbing
+                    # back to where it started.
+                    restart_i += 1
+                    run_trial(sorted(specs, key=make_random_key(rng)), adopt=True)
+                    continue
+                order = list(cur_order)
                 pos_of = {idx: i for i, idx in enumerate(order)}
-                cut = best_key[0]
+                cut = cur_key[0]
                 if cut < n_items and rng.random() < 0.5:
                     # Blocked items first: everything from the first failure
                     # on is what the incumbent could not fit. Pull a few of

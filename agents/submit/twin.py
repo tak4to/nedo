@@ -139,6 +139,28 @@ class Twin:
             self.cl.removeState(state)
             self.cl.removeBody(bid)
 
+    def place_and_settle(self, spec, pos_local, orn_idx, steps=SETTLE_STEPS):
+        """Place an item and leave it there, settled.
+
+        `settles` answers "would this survive?" and rewinds; this one keeps
+        the body, so the caller can build a whole packing one item at a time
+        the way the evaluator does. Returns the settled pose and how far the
+        item moved -- the caller compares that against the task's own
+        displacement_threshold to decide whether the episode would have ended.
+        """
+        p = self.p
+        quat = p.getQuaternionFromEuler(ORNS[orn_idx])
+        col = self.cl.createCollisionShape(
+            p.GEOM_BOX,
+            halfExtents=[spec['length'] / 2.0, spec['width'] / 2.0, spec['height'] / 2.0])
+        bid = self.cl.createMultiBody(spec.get('mass', 1.0), col,
+                                      basePosition=list(pos_local), baseOrientation=quat)
+        self.cl.changeDynamics(bid, -1, **_dyn(spec))
+        for _ in range(steps):
+            self.cl.stepSimulation()
+        fp, fo = self.cl.getBasePositionAndOrientation(bid)
+        return bid, fp, fo, math.dist(fp, pos_local)
+
     def close(self):
         try:
             self.cl.disconnect()
