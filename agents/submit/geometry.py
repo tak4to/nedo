@@ -112,6 +112,20 @@ def container_geometry(cdict):
     points_local = [(p[0] - offset_x, p[1], p[2]) for p in cdict['points']]
     n_vecs = [tuple(n) for n in cdict['n_vecs']]
 
+    # The one non-axis-aligned plane among the 7: write_open_cut_corner_cup_obj
+    # (src/ground_handling/utils.py) extrudes a pentagon cross-section (5 side
+    # planes + 2 Y end-caps = 7), and exactly one of the 5 side planes -- the
+    # chamfer joining the floor to the left wall -- has a normal with both a
+    # non-zero X and non-zero Z component (the other 4 side planes are each
+    # purely X or purely Z, and the 2 end-caps are purely Y). None if the
+    # container has no such plane (shouldn't happen given cut_x/cut_y are
+    # always > 0, but this is a geometric fact worth deriving, not assuming).
+    diag_n = diag_p = None
+    for n, p in zip(n_vecs, points_local):
+        if abs(n[1]) < 1e-6 and abs(n[0]) > 1e-6 and abs(n[2]) > 1e-6:
+            diag_n, diag_p = n, p
+            break
+
     floor_struct_z = thickness
     shelf_struct_z = height / 2.0 + thickness + buffer
 
@@ -133,6 +147,7 @@ def container_geometry(cdict):
         'is_prioritized': bool(cdict.get('is_prioritized', False)),
         'has_shelf': bool(cdict.get('shelf', False)),
         'points_local': points_local, 'n_vecs': n_vecs,
+        'diag_n': diag_n, 'diag_p': diag_p,
         'floor_struct_z': floor_struct_z, 'shelf_struct_z': shelf_struct_z,
         'static_boxes': static_boxes,
         # Usable design box, mirroring the 7 real inclusion planes with
@@ -252,3 +267,37 @@ def validate_placement(cgeom, obstacle_boxes, target_local, half_ext):
     if not check_transport_path(cgeom, obstacle_boxes, target_local, half_ext):
         return False
     return True
+
+
+def diagonal_corner_x(cgeom, cz, hx, hz, pad=WALL_CLEARANCE):
+    """The 'moving extreme point' for the container's diagonal corner
+    chamfer (docs/2026-09-20-strategy.md A-5): how far left an item's left
+    edge can sit at height `cz` while still honouring the chamfer plane,
+    with the same WALL_CLEARANCE margin every other candidate-generation
+    bound in container_geometry uses.
+
+    x_lo (the plain axis-aligned left-wall bound) is a valid but often
+    needlessly conservative stand-in for this near the floor: the chamfer
+    only clips the bottom-left corner, so an item low and short enough to
+    clear it can sit further left than x_lo alone would ever propose,
+    leaving a wedge of usable volume near the chamfer completely
+    unreachable by the ordinary flush-against-x_lo extreme points. This
+    derives the tight bound directly from the plane check_inclusion
+    itself uses (cgeom['diag_n']/['diag_p']), not from re-deriving
+    cut_x/cut_y by hand, so it can't drift out of sync with the actual
+    inclusion oracle.
+
+    Returns cgeom['x_lo'] unchanged (a no-op) when the container has no
+    such plane, or when the chamfer isn't binding at this height/size (the
+    axis-aligned wall is then the tighter bound, e.g. cz above the
+    chamfer's z-range).
+    """
+    n, p = cgeom.get('diag_n'), cgeom.get('diag_p')
+    if n is None:
+        return cgeom['x_lo']
+    nx, _ny, nz = n
+    px, _py, pz = p
+    margin = -pad
+    rhs = margin - nz * (cz - pz) - abs(nx) * hx - abs(nz) * hz + nx * px
+    cx_bound = rhs / nx
+    return max(cgeom['x_lo'], cx_bound - hx)
