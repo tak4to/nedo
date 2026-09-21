@@ -23,12 +23,13 @@ Nothing invalid can ever be returned: geometry.validate_placement is the
 final gate on every candidate, so the generator only has to be a good
 source of ideas, not perfectly correct.
 """
+import math
 import time
 
 from geometry import (
-    ALL_ORNS, GAP, FLOOR_LIFT, SAFETY_MARGIN,
+    ALL_ORNS, GAP, FLOOR_LIFT, SAFETY_MARGIN, START_Z,
     half_extents, aabb_half_extents_from_quat, container_geometry,
-    validate_placement, resting_eff_start_z,
+    validate_placement, resting_eff_start_z, diagonal_corner_x,
 )
 
 # Box tops within this of each other count as one support level, for
@@ -89,28 +90,54 @@ SUPPORT_LIFT = GAP + 0.008
 # usable volume. See _landing_under.
 OVERHANG_MIN_HALF_X = 0.5
 
-# Under-overhang candidates: BUILT, MEASURED, AND TURNED OFF.
+# Under-overhang candidates: TURNED OFF 2026-09-06, TURNED BACK ON 2026-09-20.
 #
-# The volume under a container's shelf really is unrepresentable without
-# them (see _landing_under), and on synthetic scenes filling it is worth
-# 9-10 points of items placed. It still loses:
+# Without these the volume under a container's shelf is unrepresentable --
+# _landing returns the shelf as the support surface for any footprint below
+# it, so items land *on* the shelf and never under it. Opening one jammed
+# shelf scene (S00) showed what that costs: 27 of 50 items placed, and of
+# the 7 boxes in the container's back half every single one sat at z >= 0.848,
+# i.e. on top of the shelf. Zero under it. That void is ~1.9 x 0.66 x 0.74 m
+# = 0.91 m3, 22.5% of the container, and no candidate is ever generated
+# there. The exhaustive real-validator sweep at the jam found nothing legal
+# left, so the volume has to be used early or not at all.
+#
+# It was off because a single toggle measured badly:
 #
 #   corrected shelf pools   dpacked +9.0 / +10.3  but dCOMPOSITE +0.03 / -0.20
-#   corrected mixed pool    dpacked +2.6          dCOMPOSITE +0.10
 #   corrected large pool    dpacked +3.5          dCOMPOSITE -0.68
 #   REAL sample task 001    packed 64.3% -> 54.8%, composite 58.4 -> 52.6
-#                           (deterministic, identical on 3 replicates)
 #
-# The mechanism: burying items under the shelf buries soft and priority
-# ones, so soft_item_score drops ~10 and placement drops with it, cancelling
-# the fill and cog gains. Under the leaderboard's step function the change
-# looks positive only because it rescues scenes sitting *below* the
-# minimum-items threshold -- and both real tasks sit comfortably above it
-# (70.7% and 64.3% placed), where it is a straight loss.
+# with the mechanism being that burying items under the shelf buries soft
+# and priority ones, costing ~10 points of soft_item_score.
 #
-# Kept behind this flag because the diagnosis is sound and the flag becomes
-# right the moment evidence says real tasks fall below the threshold.
-USE_UNDER_OVERHANG = False
+# Re-measured 2026-09-20, after full14's weights, OFFLINE_TIEBREAK (which
+# was worth placement +5.91 and soft +3.55 on its own) and A-1's ladder had
+# all landed -- i.e. after three changes that push directly against that
+# mechanism. The blocking result does not reproduce: real task 001 holds
+# 64.3% packed with the flag on, not 54.8%, and its composite goes up.
+# Verified on three pools this agent has never trained on, plus both real
+# tasks (one run each, so se ~= 1.05 per pool):
+#
+#   COMPOSITE   scenes_k 63.32->63.30   ktest 63.03->64.22
+#               shelftest 61.03->62.09  real 63.78->64.18   (mean +0.66)
+#   packed      scenes_k 60.9->64.2     ktest 66.5->67.0
+#               shelftest 54.3->60.3    real 71.2->70.0
+#
+# shelftest is the weakest segment there is, and +6.0 points of items placed
+# on it is the largest single move any change has made to it.
+#
+# Two things worth knowing before touching this again. First, fill and
+# norm% *fall* on the real tasks (norm 60.05 -> 52.65) while composite
+# rises, and that is not a loss being hidden: the under-shelf volume is
+# mostly a floor layer, and floor-contacting items are never counted by
+# fill_score (19 of 19 uncounted, docs/2026-09-19-実装の総括.md). The
+# volume is real, the scoring of it is not. Second, a 17.9-hour CEM run
+# that re-fitted all 14 weights *with this flag on* (tools/cem.py
+# PARAM_SETS['undershelf'], state in tools/cem_undershelf.json) scored
+# +0.70 against this flag alone at +0.66 -- a tie, on a change 14 weights
+# wide. Those weights were NOT adopted; this one line was.
+USE_UNDER_OVERHANG = True
 # Hard ceiling on oracle validations per best_placement call. This is a
 # runaway guard only -- the real budget is the caller's deadline. It must
 # stay well above the typical candidate count: once a slab fills up, every
@@ -247,6 +274,98 @@ W_SOFT_DEFER = -269.02       # pool-selection penalty for soft items
 W_PRIO_DEFER = 481.4       # pool-selection penalty for priority items
 WASTE_CELL = 0.03        # heightmap resolution for the waste feature
 
+# corridor_penalty (docs/2026-09-20-strategy.md A-3): shipped at 0, so
+# _corridor_excess is not even called (see use_corridor in _collect) until
+# something sets this -- same convention as W_SIDE above. A reference
+# implementation on the same competition (public 61.092, see the strategy
+# doc) measured this cutting fail_transport_y from 22.5% to 3.1% on one
+# scene: piling tall near the door self-blocks the Y-sweep for anything
+# later targeting a larger Y in the same X-lane, since geometry.py's
+# check_transport_path travels near the *ceiling* by default for any item
+# not itself landing flush on the floor/shelf (resting_eff_start_z), not
+# at the height of whatever's already there.
+#
+# MEASURED AND CLOSED (32-scene pool, 2026-09-19). Four weights, monotone
+# downward, never once above the W_CORRIDOR=0 baseline of norm 48.88:
+#
+#   W_CORRIDOR   10     30     100    300
+#   norm%        48.47  48.39  47.24  (5-scene probe, clearly worse)
+#
+# and 48.56 against a 48.76 baseline when re-measured on identical code
+# after the dedup below. A monotone dose-response toward baseline-at-zero
+# is not a mis-scaled weight, it is a term pointing the wrong way. The
+# likeliest reason it transfers badly from the agent that gained +2.33
+# with it: that one was rescuing fail_transport_y, while our transport
+# failures were already fixed structurally (SUPPORT_LIFT, then A-1's
+# ladder), so the penalty now only distorts placements that were fine.
+# Left at 0 with the machinery intact, like USE_SETTLE_TWIN above.
+W_CORRIDOR = 0.0
+# The deadband below which a candidate's excess height over what's already
+# committed further back doesn't count. Set relative to geometry.START_Z
+# (the elevation the transport sweep normally flies at) rather than
+# invented from scratch: a candidate that's taller than the back item by
+# less than that clearance is already inside the slack the sweep has by
+# construction. The +0.0005 mirrors resting_eff_start_z's own epsilon
+# (geometry.py) for the same kind of boundary-safety pad.
+CORRIDOR_DEADBAND = START_Z + 0.0005
+
+# look-ahead feasibility counter (docs/2026-09-20-strategy.md A-4). Ships at
+# 0, so none of the machinery below runs until something sets it.
+#
+# This idea has been measured before and LOST: tools/survival.py re-ranked
+# the top-K candidates by how many item *types* still had a feasible
+# placement, and scored 25.31 against a 25.47 baseline (docs/GAMEPLAN.md
+# 1.4). That writeup names two structural reasons, and only one of them
+# still stands:
+#
+#   1. "the signal is flat until the cliff" -- with a binary per-type test,
+#      every candidate ties at 7/7 until it is already too late. STILL
+#      TRUE of that design, and the reason this one counts *placements*
+#      rather than types, and takes a log rather than a threshold: it has
+#      to separate candidates while there is still room to act on it.
+#   2. "it eats the search budget" -- survival.py spent 55% of the policy
+#      budget probing, because each probe ran a full best_placement. NO
+#      LONGER BINDING, for two independent reasons: MIN_CALL_BUDGET fixed
+#      the starvation that made search time precious (with it in place,
+#      tripling the budget is worth +0.07), and this version never calls
+#      the validator at all -- it is arithmetic on a coarse height map.
+#
+# Scored as a *delta* (after minus before) rather than a level, so it is
+# comparable across containers when choose_action comes to pick between
+# them, and so it reads as "how much future room does this placement
+# destroy" -- the hazard increment of docs/GAMEPLAN.md 1.1, which is the
+# quantity the absorbing-episode structure says a greedy should minimise.
+#
+# MEASURED AND CLOSED (32-scene pool, 2026-09-19): W_FEAS 100/500/2000
+# scored norm 48.42/48.93/48.53 against a 48.88 baseline -- no effect at
+# any weight. Instrumenting 1651 real decisions says why, and it is not
+# the weight: the feasibility delta between the top three candidates is
+# *exactly zero* in 88% of them, and the decision changes in 0.8%.
+#
+# Reason 1 of docs/GAMEPLAN.md 1.4 therefore survived the rewrite. A
+# height map measures headroom, and headroom is not what binds here --
+# tools/diag_void.py already established that below-skyline occupancy is
+# 85-93% and that nearly all the free space is *above* the skyline, unused
+# because it cannot be reached, not because it is too short. So this
+# counter reports "plenty of room" for essentially the whole episode.
+#
+# That leaves A-4 in a vice: the cheap form measures the non-binding
+# constraint (this), and the faithful form has to consult the transport
+# oracle, which is what cost tools/survival.py 55% of the policy budget
+# and lost 25.47 -> 25.31. The one cheap reachability proxy that does
+# exist is W_CORRIDOR above -- and that measured negative too.
+#
+# A second finding came out of the same instrumentation and outlives this
+# feature: 57% of those decisions had all three top candidates at the
+# *same* (x, y, z), mean 1.65 distinct of 3. Top-K re-ranking has almost
+# nothing to choose between in this search, which is one mechanism for
+# three separate past failures (survival.py's re-rank, the twin as a
+# preference, and all three of tools/stage2_probe.py's physics selectors).
+# Diversify the top-K before trying any second-stage selector again.
+W_FEAS = 0.0
+FEAS_TOPK = 3            # valid candidates collected and re-ranked
+FEAS_CELL = 0.05         # height-map resolution (coarser than WASTE_CELL)
+
 
 def _waste_depths(cstate, cands):
     """Mean void depth under each candidate's footprint, vectorised.
@@ -326,6 +445,151 @@ def _side_contact_frac(cstate, cx, cy, hx, hy, bottom, top, fx, fy, fz):
                 area += ox * zc
     total_side = 2.0 * (fx + fy) * fz
     return min(area / total_side, 1.0) if total_side > 0.0 else 0.0
+
+
+def _window_min(a, k, axis):
+    """Sliding-window minimum of length k along `axis`, sparse-table style.
+
+    ceil(log2(k)) pairwise passes instead of k, which matters because this
+    runs once per (item type, candidate) and item footprints are 8-20 cells
+    across. Returns the array shortened by k-1 along `axis`; an empty
+    result (window wider than the map) means "does not fit anywhere".
+    """
+    import numpy as np
+    n = a.shape[axis]
+    if k <= 1:
+        return a
+    if k > n:
+        return np.empty([0 if i == axis else s for i, s in enumerate(a.shape)])
+    out = a
+    step = 1
+    while step * 2 <= k:
+        s1 = [slice(None)] * a.ndim
+        s2 = [slice(None)] * a.ndim
+        s1[axis] = slice(0, out.shape[axis] - step)
+        s2[axis] = slice(step, out.shape[axis])
+        out = np.minimum(out[tuple(s1)], out[tuple(s2)])
+        step *= 2
+    if step < k:
+        # One more overlapping window of width `step` closes the gap to k.
+        rest = k - step
+        s1 = [slice(None)] * a.ndim
+        s2 = [slice(None)] * a.ndim
+        s1[axis] = slice(0, out.shape[axis] - rest)
+        s2[axis] = slice(rest, out.shape[axis])
+        out = np.minimum(out[tuple(s1)], out[tuple(s2)])
+    return out
+
+
+def _height_map(cstate, cell, extra=None):
+    """Top-of-stack height per cell, over the container's usable XY box.
+
+    `extra` is an optional (cx, cy, hx, hy, top) to stamp on as if it were
+    already placed -- that is how a candidate's effect is evaluated
+    without committing it.
+    """
+    import numpy as np
+    g = cstate.geom
+    x0, x1 = g['x_lo'], g['x_hi']
+    y0, y1 = g['y_lo'], g['y_hi']
+    nx = max(int((x1 - x0) / cell) + 1, 1)
+    ny = max(int((y1 - y0) / cell) + 1, 1)
+    H = np.full((nx, ny), g['floor_struct_z'], dtype=np.float64)
+    boxes = [(b['center'][0], b['center'][1], b['half'][0], b['half'][1],
+              b['center'][2] + b['half'][2])
+             for b in cstate.boxes + cstate.static_obstacles]
+    if extra is not None:
+        boxes.append(extra)
+    for (bcx, bcy, bhx, bhy, btop) in boxes:
+        i0 = max(int((bcx - bhx - x0) / cell), 0)
+        i1 = min(int((bcx + bhx - x0) / cell) + 1, nx)
+        j0 = max(int((bcy - bhy - y0) / cell), 0)
+        j1 = min(int((bcy + bhy - y0) / cell) + 1, ny)
+        if i1 > i0 and j1 > j0:
+            np.maximum(H[i0:i1, j0:j1], btop, out=H[i0:i1, j0:j1])
+    return H
+
+
+def _feasibility(cstate, types, cell=FEAS_CELL, extra=None):
+    """Graded room-left estimate: how many places the items we still have
+    to fit could go, on the height map, weighted by how many of each we
+    hold.
+
+    Deliberately *not* the validator. Inclusion and the transport sweep
+    are what decide legality, and consulting them here is what made the
+    previous attempt unaffordable; this only has to rank candidates
+    against each other, so a headroom test on a coarse map is enough. It
+    is therefore an optimistic count -- it ignores reachability -- and its
+    absolute value means nothing. Only differences between candidates on
+    the same map are used.
+
+    log1p keeps a type that has 400 spots from drowning out one that has
+    3, which is the whole point: the binary version of this feature
+    (docs/GAMEPLAN.md 1.4) could not separate candidates until some type
+    hit zero, by which time the episode was already lost.
+    """
+    import numpy as np
+    g = cstate.geom
+    H = _height_map(cstate, cell, extra)
+    free = g['z_hi'] - H           # headroom above the stack, per cell
+    total_w = 0.0
+    acc = 0.0
+    for (l, w, h), cnt in types.items():
+        best = 0
+        for (fx, fy, fz) in ((l, w, h), (w, l, h), (l, h, w),
+                             (h, l, w), (w, h, l), (h, w, l)):
+            kx = max(int(fx / cell), 1)
+            ky = max(int(fy / cell), 1)
+            if kx > free.shape[0] or ky > free.shape[1]:
+                continue
+            m = _window_min(_window_min(free, kx, 0), ky, 1)
+            if m.size:
+                best = max(best, int(np.count_nonzero(m >= fz)))
+        acc += cnt * math.log1p(best)
+        total_w += cnt
+    return acc / total_w if total_w else 0.0
+
+
+def _pool_types(pool):
+    """Distinct (l, w, h) still waiting, with counts as an arrival prior.
+    Rounded so that float noise doesn't split one type into several."""
+    types = {}
+    for _idx, spec in pool:
+        key = (round(spec['length'], 3), round(spec['width'], 3), round(spec['height'], 3))
+        types[key] = types.get(key, 0) + 1
+    return types
+
+
+def _corridor_excess(cstate, cx, cy, hx, hy, top):
+    """How much this candidate's own top exceeds the shortest already-placed
+    item sitting entirely further back (larger Y) in an overlapping X-lane,
+    beyond CORRIDOR_DEADBAND -- see W_CORRIDOR above for the mechanism.
+
+    'Entirely further back' (the existing box's near edge is at or beyond
+    this candidate's far edge) rather than merely 'further back on
+    average' keeps this a clean staircase comparison: a box beside the
+    candidate in Y (partial overlap) isn't what creates the blocking
+    profile this is meant to catch. 0 when nothing qualifies -- nothing
+    placed back there yet, or this candidate doesn't exceed it beyond the
+    deadband -- so an empty or freshly-opened lane never pays anything.
+
+    O(number of placed items); only called when W_CORRIDOR != 0 (see
+    use_corridor in _collect), so it costs nothing at the shipped weight.
+    """
+    min_back_top = None
+    for b in cstate.boxes:
+        bx, by, bz = b['center']
+        bhx, bhy, bhz = b['half']
+        if abs(bx - cx) >= bhx + hx:
+            continue
+        if by - bhy < cy + hy - 1e-6:
+            continue
+        bt = bz + bhz
+        if min_back_top is None or bt < min_back_top:
+            min_back_top = bt
+    if min_back_top is None:
+        return 0.0
+    return max(0.0, top - min_back_top - CORRIDOR_DEADBAND)
 
 
 def _shape_features(g, support, cx, cy, hx, hy, fx, fy, top):
@@ -651,7 +915,8 @@ def settled_center_z(cstate, cx, cy, half):
 
 
 def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
-                         bridge=GAP / 2.0 + 0.003):
+                         bridge=GAP / 2.0 + 0.003, min_cover=None,
+                         require_centroid=True):
     """Stand-in for the evaluator's third gate: `place_item` warps the box
     in, runs SETTLE_STEPS of physics, and fails the episode if the box
     then moved more than `displacement_threshold` or tipped more than
@@ -664,9 +929,18 @@ def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
     if its centre of mass projects inside the contact patch:
 
       1. the item's centre sits over a support,
-      2. at least SUPPORT_MIN_COVER of the footprint is carried,
+      2. at least `min_cover` (default SUPPORT_MIN_COVER) of the footprint
+         is carried,
       3. the contact patch's centroid is near the item's centre, so the
-         load is not all on one edge.
+         load is not all on one edge (skipped when `require_centroid` is
+         False).
+
+    `min_cover`/`require_centroid` exist so the last-resort ladder in
+    agent._fallback_action can relax gates (2) and (3) in steps instead of
+    jumping straight to `require_support=False` (no support check at all,
+    not even (1)) -- docs/2026-09-20-strategy.md A-1. Every caller inside
+    the primary search passes the defaults, so this is a no-op until
+    something asks for less.
 
     The `bridge` allowance spans the ordinary inter-item GAP -- every
     neighbouring pair has one by design, and a rigid box resting across a
@@ -691,6 +965,12 @@ def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
 
     if not carried(cx, cy):
         return False
+    if min_cover is None:
+        min_cover = SUPPORT_MIN_COVER
+    if min_cover <= 0.0 and not require_centroid:
+        # Weakest rung: only gate (1) above, i.e. "positive contact area",
+        # applies. No point walking the grid just to discard it.
+        return True
     hit = 0
     total = 0
     sx = sy = 0.0
@@ -703,8 +983,10 @@ def _footprint_supported(cx, cy, fx, fy, support, inset=0.004, grid=7,
                 hit += 1
                 sx += px
                 sy += py
-    if hit < SUPPORT_MIN_COVER * total:
+    if hit < min_cover * total:
         return False
+    if not require_centroid:
+        return True
     # Load centroid must be near the item's own centre, else it tips.
     return (abs(sx / hit - cx) <= hx * SUPPORT_CENTROID_TOL and
             abs(sy / hit - cy) <= hy * SUPPORT_CENTROID_TOL)
@@ -850,16 +1132,30 @@ def _y_candidates(cstate, fy, walls):
     return [(y, _wall_for_y(walls, y)) for y in ys]
 
 
-def _xy_candidates(cstate, fx, fy, walls):
+def _xy_candidates(cstate, fx, fy, walls, hz):
     """Extreme points for the item's (left, back) corner: Y from
     _y_candidates (wall-aware), X still classic extreme-point (flush
     with, or GAP past, a neighbour's edge) -- there's no structural story
     on X either way, since the transport sweep enters at the item's own
     target X, not a shared corridor (verified against validator.py), so
     X positions never needed to align across items. Yields (x, y, wall)
-    triples."""
+    triples.
+
+    Plus one 'moving extreme point' (docs/2026-09-20-strategy.md A-5):
+    how far left this item could sit at floor height while still hugging
+    the container's diagonal corner chamfer, which x_lo alone is often
+    too conservative to reach (see diagonal_corner_x). Computed for the
+    floor-resting case specifically -- the common one, and the one where
+    the chamfer's low z-range actually applies -- and added as one more
+    candidate regardless of what this item ends up landing on, since an
+    extra candidate can only ever be validated away, never make an
+    existing one worse (docs/STRATEGY.md: additive candidate-generation
+    changes are structurally safe in a way restrictive ones are not)."""
     g = cstate.geom
     xs = {g['x_lo'], g['x_hi'] - fx}
+    diag_x = diagonal_corner_x(g, g['floor_struct_z'] + FLOOR_LIFT + hz, fx / 2.0, hz)
+    if diag_x > g['x_lo'] + 1e-6:
+        xs.add(diag_x)
     for b in cstate.boxes + cstate.static_obstacles:
         bx0 = b['center'][0] - b['half'][0]
         bx1 = b['center'][0] + b['half'][0]
@@ -904,6 +1200,7 @@ def _collect(cstate, item_spec, relax, xy_fn):
     # something actually sets them.
     use_shape = bool(W_SUPPORT or W_WALL or W_SEAM or W_CEIL)
     use_side = bool(W_SIDE)  # separate gate: O(n_boxes), not O(n_support)
+    use_corridor = bool(W_CORRIDOR)  # separate gate: O(n_boxes), not O(n_support)
 
     candidates = []
     for orn in ALL_ORNS:
@@ -911,7 +1208,7 @@ def _collect(cstate, item_spec, relax, xy_fn):
         fx, fy, fz = 2 * hx, 2 * hy, 2 * hz
         if fz > max_h:
             continue
-        for (x_left, y_back, wall) in xy_fn(cstate, fx, fy, walls):
+        for (x_left, y_back, wall) in xy_fn(cstate, fx, fy, walls, hz):
             cx = x_left + hx
             cy = y_back - hy
             support_top, support = _landing(cstate, cx, cy, hx, hy)
@@ -939,6 +1236,8 @@ def _collect(cstate, item_spec, relax, xy_fn):
             if use_side:
                 score += W_SIDE * _side_contact_frac(
                     cstate, cx, cy, hx, hy, bottom, top, fx, fy, fz)
+            if use_corridor:
+                score -= W_CORRIDOR * _corridor_excess(cstate, cx, cy, hx, hy, top)
             candidates.append((score, cx, cy, bottom + hz, hx, hy, hz, orn, support, fx, fy))
     if has_overhang:
         for orn in ALL_ORNS:
@@ -946,7 +1245,7 @@ def _collect(cstate, item_spec, relax, xy_fn):
             fx, fy, fz = 2 * hx, 2 * hy, 2 * hz
             if fz > max_h:
                 continue
-            for (x_left, y_back, _wall) in xy_fn(cstate, fx, fy, walls):
+            for (x_left, y_back, _wall) in xy_fn(cstate, fx, fy, walls, hz):
                 cx = x_left + hx
                 cy = y_back - hy
                 found = _landing_under(cstate, cx, cy, hx, hy)
@@ -968,14 +1267,60 @@ def _collect(cstate, item_spec, relax, xy_fn):
         candidates = [(c[0] - W_WASTE * float(d),) + c[1:]
                       for c, d in zip(candidates, depths)]
     candidates.sort(key=lambda c: -c[0])
-    return candidates
+    # Drop candidates that describe the *same box in the same place*.
+    #
+    # ALL_ORNS always enumerates six orientations, but an item whose width
+    # equals its height (0.50 x 0.40 x 0.40 is one of the two mid-size
+    # types in the real catalogue, and those two are ~64% of all items)
+    # yields pairs of orientations with identical half-extents, hence an
+    # identical (centre, half) box at every candidate corner. Measured on
+    # R000: 4.4% of enumerated candidates overall, but 50% for that item.
+    #
+    # The theory was that this buys search depth: _first_valid validates in
+    # score order under a MAX_VALIDATIONS cap, so a duplicate spends one of
+    # those slots re-deciding a box it has already ruled on.
+    #
+    # MEASURED NEUTRAL (32-scene pool, 2026-09-19): norm 48.88 -> 48.76,
+    # composite 62.91 -> 62.82, items placed 62.5% -> 62.4%, all inside a
+    # single-seed se of ~1.05. The cap is evidently not what binds -- the
+    # walk usually returns long before it, and in the jammed states where it
+    # does run long, the time deadline stops it first.
+    #
+    # Kept anyway, as hygiene rather than as an improvement: validating the
+    # same box twice is work with no possible outcome, and it makes
+    # MAX_VALIDATIONS mean "distinct placements considered", which is what
+    # anything reasoning about that budget would assume it means. Safe
+    # because the two really are one box -- half-extents, landing support
+    # and resting height are all identical, only the orientation index
+    # differs, and the items are uniform-density cuboids.
+    seen = set()
+    out = []
+    for c in candidates:
+        key = (round(c[1], 6), round(c[2], 6), round(c[3], 6),
+               round(c[4], 6), round(c[5], 6), round(c[6], 6))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(c)
+    return out
 
 
-def _first_valid(cstate, candidates, time_deadline, require_support=True, verify=None):
+def _first_valid(cstate, candidates, time_deadline, require_support=True, verify=None,
+                 min_cover=None, require_centroid=True, types=None):
+    """The highest-scoring candidate that passes every gate.
+
+    With `types` (the item types still to come) and W_FEAS set, this
+    collects the first FEAS_TOPK survivors instead of returning at the
+    first, and picks between them on base score plus how much room each
+    leaves for `types` -- A-4, see W_FEAS. Off by default, and then the
+    loop returns at the first survivor exactly as it always has.
+    """
     g = cstate.geom
     obstacles = cstate.obstacle_boxes()
     checked = 0
     demoted = None
+    rerank = bool(W_FEAS) and types is not None
+    kept = []
     for (score, cx, cy, cz, hx, hy, hz, orn, support, fx, fy) in candidates:
         if checked >= MAX_VALIDATIONS:
             break
@@ -983,7 +1328,9 @@ def _first_valid(cstate, candidates, time_deadline, require_support=True, verify
             break
         checked += 1
         if (require_support and support is not None
-                and not _footprint_supported(cx, cy, fx, fy, support)):
+                and not _footprint_supported(cx, cy, fx, fy, support,
+                                             min_cover=min_cover,
+                                             require_centroid=require_centroid)):
             continue
         if not validate_placement(g, obstacles, (cx, cy, cz), (hx, hy, hz)):
             continue
@@ -999,12 +1346,31 @@ def _first_valid(cstate, candidates, time_deadline, require_support=True, verify
             if demoted is None:
                 demoted = ((cx, cy, cz), orn, score)
             continue
-        return (cx, cy, cz), orn, score
-    return demoted
+        if not rerank:
+            return (cx, cy, cz), orn, score
+        kept.append((score, cx, cy, cz, hx, hy, hz, orn, fx, fy))
+        if len(kept) >= FEAS_TOPK:
+            break
+    if not kept:
+        return demoted
+    if len(kept) == 1:
+        s, cx, cy, cz, _hx, _hy, _hz, orn, _fx, _fy = kept[0]
+        return (cx, cy, cz), orn, s
+    base = _feasibility(cstate, types)
+    best = None
+    best_score = float('-inf')
+    for (s, cx, cy, cz, hx, hy, hz, orn, fx, fy) in kept:
+        after = _feasibility(cstate, types,
+                             extra=(cx, cy, hx, hy, cz + hz))
+        adj = s + W_FEAS * (after - base)
+        if adj > best_score:
+            best_score = adj
+            best = ((cx, cy, cz), orn, s)
+    return best
 
 
 def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_support=True,
-                   verify=None):
+                   verify=None, min_cover=None, require_centroid=True, types=None):
     """Highest-scoring valid placement for this item, or None.
 
     Candidates are enumerated and scored first, then validated in score
@@ -1013,17 +1379,23 @@ def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_s
     first because they pack tightly; a grid sweep is the fallback, since
     on its own the extreme-point set goes empty long before the container
     is actually full.
+
+    `min_cover`/`require_centroid` pass straight through to
+    `_footprint_supported` via `_first_valid` -- see there for what they
+    relax and why.
     """
     result = _first_valid(cstate, _collect(cstate, item_spec, relax, _xy_candidates),
-                          time_deadline, require_support, verify)
+                          time_deadline, require_support, verify, min_cover, require_centroid,
+                          types)
     if result is not None:
         return result
     for step in (0.05, 0.025):
         if time_deadline is not None and time.perf_counter() > time_deadline:
             break
         cands = _collect(cstate, item_spec, relax,
-                         lambda cs, fx, fy, walls, _s=step: _grid_xy(cs, fx, fy, _s, walls))
-        result = _first_valid(cstate, cands, time_deadline, require_support, verify)
+                         lambda cs, fx, fy, walls, hz, _s=step: _grid_xy(cs, fx, fy, _s, walls))
+        result = _first_valid(cstate, cands, time_deadline, require_support, verify,
+                              min_cover, require_centroid, types)
         if result is not None:
             return result
     return None
@@ -1295,7 +1667,7 @@ def pack_metrics(states):
 
 
 def choose_action(container_states, pool, time_deadline, relax=False, require_support=True,
-                  verifier=None):
+                  verifier=None, min_cover=None, require_centroid=True):
     """Returns (pool_idx, container_idx, pos_local, orn_idx) or None.
 
     When the pool offers a choice, big items go first. The placement
@@ -1310,6 +1682,9 @@ def choose_action(container_states, pool, time_deadline, relax=False, require_su
     any_priority_container = any(cs.geom['is_prioritized'] for cs in container_states.values())
     items = sorted(pool, key=lambda t: -(t[1]['length'] * t[1]['width'] * t[1]['height']))
     n_calls = max(len(items) * len(container_states), 1)
+    # What is still waiting, for the A-4 look-ahead. Built once per call,
+    # and only when something has turned the feature on.
+    types = _pool_types(pool) if W_FEAS else None
 
     best = None
     best_score = float('-inf')
@@ -1324,7 +1699,7 @@ def choose_action(container_states, pool, time_deadline, relax=False, require_su
             per_call = max((time_deadline - now) / max(left, 1), MIN_CALL_BUDGET)
             verify = None if verifier is None else verifier(cidx, spec)
             result = best_placement(cstate, spec, min(time_deadline, now + per_call), relax,
-                                    require_support, verify)
+                                    require_support, verify, min_cover, require_centroid, types)
             if result is None:
                 continue
             pos, orn, score = result

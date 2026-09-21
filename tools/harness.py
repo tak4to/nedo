@@ -127,9 +127,18 @@ def ceiling_fill(cfg):
     return min(100*tot_v/denom, 100)
 
 
+# Constants to force onto the *agent* module, applied after the reload below.
+# geometry/packer constants can be set by the caller before run_scene, but
+# agent's cannot: run_scene reloads that module, which would wipe them. Set
+# this dict instead (ab.py --set a:NAME=value does).
+AGENT_OVERRIDES = {}
+
+
 def run_scene(name, cfg, agent_mod='agent', policy_budget=None, optimize_budget=None):
     import agent as agent_module
     importlib.reload(agent_module)
+    for k, v in AGENT_OVERRIDES.items():
+        setattr(agent_module, k, v)
     if policy_budget is not None:
         agent_module.POLICY_TIME_BUDGET = policy_budget
     if optimize_budget is not None:

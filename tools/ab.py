@@ -9,14 +9,21 @@ def _one(args):
     sys.path.insert(0,ROOT); sys.path.insert(0, os.environ['AGENT_DIR'])
     sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
     import geometry, packer
+    import harness
+    agent_ov = {}
     for mod, k, v in overrides:
+        if mod == 'a':
+            # agent constants can't be set here -- run_scene reloads that
+            # module. Hand them to harness, which applies them after.
+            agent_ov[k] = v
+            continue
         m = {'g':geometry,'p':packer}[mod]
         setattr(m, k, v)
         if mod=='g' and hasattr(packer,k):
             setattr(packer,k,v)
+    harness.AGENT_OVERRIDES = agent_ov
     if patch and patch != 'none':
         import patches; patches.apply5(patch)
-    import harness
     return harness.run_scene(name, cfg, policy_budget=pol, optimize_budget=opt)
 
 def main():

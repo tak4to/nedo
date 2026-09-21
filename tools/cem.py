@@ -91,6 +91,45 @@ PARAM_SETS['full15'] = [
     ('p', 'W_PRIO_DEFER', 481.4, 'lin', -3000.0, 3000.0),
     ('p', 'W_SIDE', 0.0, 'lin', -300.0, 3000.0),
 ]
+# Re-fit the shipped full14 vector for a world where the space under the
+# container shelf is reachable (docs/2026-09-19-実装の総括.md, and the
+# diagnosis in memory: opening one jammed shelf scene showed 0.91 m3 --
+# 22.5% of the container -- holding zero boxes, because USE_UNDER_OVERHANG
+# is off and so _landing_under never proposes a candidate there).
+#
+# That flag was measured and turned off for a documented reason: burying
+# items under the shelf buries soft and priority ones, costing ~10 points
+# of soft_item_score, and real task 001 went 64.3% -> 54.8% packed. But
+# that was a *single toggle* against weights fitted for the flag being
+# OFF -- and the two weights that govern the named failure mechanism,
+# W_SOFT_DEFER and W_PRIO_DEFER, are both in this search. Joint fitting is
+# exactly what turned 0-for-24 single-feature A/Bs into full14's +6.34.
+#
+# USE_UNDER_OVERHANG is pinned rather than searched: lo == hi == 1.0 makes
+# its sigma zero and from_search clamp it, so every candidate in every
+# generation runs with the under-shelf candidates switched on.
+#
+# W_SIDE is deliberately NOT carried over from full15. It was measured on
+# 2026-09-19 and moves its own mechanism backwards -- raising it made shake
+# displacement worse (0.168 -> 0.195 m), not better -- so it would only
+# cost a dimension of search.
+PARAM_SETS['undershelf'] = [
+    ('p', 'W_LOW', 415.8, 'log', 50.0, 3000.0),
+    ('p', 'W_BACK', 326.87, 'log', 20.0, 2000.0),
+    ('p', 'W_FLAT', 1368.9, 'log', 50.0, 5000.0),
+    ('p', 'W_LEFT', 130.16, 'log', 10.0, 2000.0),
+    ('p', 'W_MASS_HIGH', 0.50605, 'log', 0.05, 200.0),
+    ('p', 'W_ITEM_VOL', 1351.2, 'log', 100.0, 30000.0),
+    ('p', 'SUPPORT_MIN_COVER', 0.62978, 'lin', 0.30, 0.95),
+    ('p', 'W_WASTE', 107.04, 'lin', -300.0, 3000.0),
+    ('p', 'W_SUPPORT', 222.17, 'lin', -300.0, 3000.0),
+    ('p', 'W_WALL', 67.088, 'lin', -300.0, 3000.0),
+    ('p', 'W_SEAM', -332.72, 'lin', -1500.0, 1500.0),
+    ('p', 'W_CEIL', 469.29, 'lin', -1500.0, 1500.0),
+    ('p', 'W_SOFT_DEFER', -269.02, 'lin', -3000.0, 3000.0),
+    ('p', 'W_PRIO_DEFER', 481.4, 'lin', -3000.0, 3000.0),
+    ('p', 'USE_UNDER_OVERHANG', 1.0, 'lin', 1.0, 1.0),
+]
 
 
 def to_search(v, kind):
