@@ -1,0 +1,17 @@
+{
+  "tag": "support_centroid_tol_045",
+  "base": {
+    "agent.py": "fcb7b6f20798",
+    "twin.py": "e5b0dc4a8a35",
+    "geometry.py": "e075a840f101",
+    "packer.py": "eeebe44e748f"
+  },
+  "changes": [
+    {
+      "name": "SUPPORT_CENTROID_TOL",
+      "file": "packer.py",
+      "old": "SUPPORT_CENTROID_TOL = 0.35",
+      "new": "SUPPORT_CENTROID_TOL = 0.45"
+    }
+  ]
+}
