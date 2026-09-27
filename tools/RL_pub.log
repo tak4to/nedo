@@ -1,0 +1,6 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### RL_pub  overrides=[] patch=none
+  R000             fill= 23.8 cog= 64.6 stab= 48.9 place=100.0 soft=100.0 | comp= 67.5 packed=58.5% disp=0.220
+  R001             fill= 30.2 cog= 54.8 stab= 38.6 place=100.0 soft= 64.3 | comp= 57.6 packed=66.7% disp=0.174
+  == norm%=40.17 fill=26.98 cog=59.72 stab=43.77 place=100.00 soft=82.14 | COMPOSITE=62.52 packed=62.6%  [136s]

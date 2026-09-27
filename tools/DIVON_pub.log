@@ -1,0 +1,47 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### DIVON_pub  overrides=[] patch=none
+  divon_ktest_L00  fill= 28.7 cog= 54.5 stab= 47.8 place=100.0 soft=100.0 | comp= 66.2 packed=38.0% disp=0.110
+  divon_ktest_L02  fill= 33.3 cog= 55.9 stab= 36.7 place=100.0 soft= 81.8 | comp= 61.5 packed=48.9% disp=0.160
+  divon_ktest_L03  fill= 24.9 cog= 64.1 stab= 43.1 place=100.0 soft= 94.4 | comp= 65.3 packed=52.5% disp=0.142
+  divon_ktest_L04  fill= 14.0 cog= 66.9 stab= 34.6 place=100.0 soft= 90.0 | comp= 61.1 packed=42.2% disp=0.223
+  divon_ktest_L05  fill= 22.5 cog= 62.4 stab= 40.2 place=100.0 soft= 91.2 | comp= 63.2 packed=52.5% disp=0.199
+  divon_ktest_L06  fill= 22.7 cog= 62.1 stab= 49.5 place=100.0 soft=100.0 | comp= 66.8 packed=45.0% disp=0.121
+  divon_ktest_L07  fill= 21.2 cog= 61.8 stab= 59.3 place= 75.0 soft= 83.3 | comp= 60.1 packed=44.4% disp=0.096
+  divon_ktest_L09  fill= 24.8 cog= 60.4 stab= 44.2 place= 75.0 soft= 81.2 | comp= 57.1 packed=60.0% disp=0.219
+  divon_ktest_L10  fill= 18.5 cog= 62.6 stab= 41.8 place=100.0 soft= 85.7 | comp= 61.7 packed=42.0% disp=0.144
+  divon_ktest_L12  fill= 30.2 cog= 56.0 stab= 33.4 place=100.0 soft= 94.1 | comp= 62.7 packed=48.0% disp=0.196
+  divon_ktest_L13  fill= 22.3 cog= 59.8 stab= 36.3 place= 80.0 soft= 90.9 | comp= 57.9 packed=43.3% disp=0.234
+  divon_ktest_L14  fill= 19.1 cog= 61.2 stab= 35.9 place=100.0 soft=100.0 | comp= 63.2 packed=40.0% disp=0.201
+  divon_ktest_L21  fill= 22.6 cog= 61.7 stab= 43.0 place=100.0 soft=100.0 | comp= 65.5 packed=40.0% disp=0.126
+  divon_ktest_L22  fill= 22.3 cog= 62.8 stab= 49.0 place=100.0 soft= 87.5 | comp= 64.3 packed=39.0% disp=0.124
+  divon_ktest_L23  fill= 19.6 cog= 59.1 stab= 39.1 place=100.0 soft=100.0 | comp= 63.6 packed=46.0% disp=0.193
+  divon_ktest_L24  fill= 22.4 cog= 60.6 stab= 44.5 place=100.0 soft= 94.4 | comp= 64.4 packed=48.9% disp=0.168
+  divon_ktest_L29  fill= 20.3 cog= 61.7 stab= 29.6 place= 91.7 soft= 87.5 | comp= 58.1 packed=40.0% disp=0.196
+  divon_ktest_L31  fill= 19.8 cog= 57.5 stab= 32.8 place=100.0 soft= 91.7 | comp= 60.4 packed=62.5% disp=0.237
+  divon_test_T01   fill= 15.3 cog= 61.1 stab= 52.2 place=100.0 soft=100.0 | comp= 65.7 packed=45.0% disp=0.131
+  divon_test_T02   fill= 27.2 cog= 57.2 stab= 61.7 place=100.0 soft= 98.5 | comp= 68.9 packed=51.1% disp=0.093
+  divon_test_T03   fill= 20.2 cog= 62.7 stab= 65.1 place= 83.3 soft=100.0 | comp= 66.3 packed=35.0% disp=0.061
+  divon_test_T06   fill= 22.7 cog= 64.0 stab= 50.2 place=100.0 soft=100.0 | comp= 67.4 packed=45.0% disp=0.130
+  divon_test_T07   fill= 21.5 cog= 61.3 stab= 44.0 place=100.0 soft= 88.9 | comp= 63.1 packed=40.0% disp=0.168
+  divon_test_T08   fill= 19.1 cog= 60.4 stab= 41.6 place=100.0 soft= 86.4 | comp= 61.5 packed=45.0% disp=0.158
+  divon_test_T09   fill= 27.1 cog= 65.4 stab= 45.9 place=100.0 soft=100.0 | comp= 67.7 packed=40.0% disp=0.151
+  divon_test_T16   fill= 29.4 cog= 56.9 stab= 46.0 place=100.0 soft= 87.0 | comp= 63.9 packed=46.0% disp=0.145
+  divon_test_T17   fill= 34.4 cog= 57.5 stab= 61.5 place=100.0 soft= 90.0 | comp= 68.7 packed=62.2% disp=0.123
+  divon_test_T18   fill= 22.0 cog= 61.8 stab= 50.4 place=100.0 soft=100.0 | comp= 66.8 packed=37.0% disp=0.093
+  divon_test_T19   fill= 31.3 cog= 59.4 stab= 54.8 place= 87.5 soft= 84.6 | comp= 63.5 packed=57.5% disp=0.100
+  divon_test_T20   fill= 22.6 cog= 61.3 stab= 61.4 place=100.0 soft=100.0 | comp= 69.1 packed=52.5% disp=0.067
+  divon_test_T21   fill= 26.4 cog= 61.8 stab= 48.8 place=100.0 soft= 98.1 | comp= 67.0 packed=53.8% disp=0.140
+  divon_test_T22   fill= 22.5 cog= 63.0 stab= 51.6 place= 62.5 soft= 98.1 | comp= 59.6 packed=38.0% disp=0.157
+  divon_test_T23   fill= 28.9 cog= 58.5 stab= 46.2 place= 71.4 soft= 94.4 | comp= 59.9 packed=43.0% disp=0.105
+  divon_test_T24   fill= 22.7 cog= 59.5 stab= 49.9 place=100.0 soft=100.0 | comp= 66.4 packed=50.0% disp=0.079
+  divon_test_T26   fill= 35.9 cog= 54.9 stab= 74.7 place=100.0 soft= 85.7 | comp= 70.2 packed=53.3% disp=0.033
+  divon_test_T29   fill= 21.6 cog= 61.4 stab= 46.6 place=100.0 soft= 97.4 | comp= 65.4 packed=36.0% disp=0.165
+  divon_test_T30   fill= 25.2 cog= 61.6 stab= 62.1 place= 87.5 soft= 90.0 | comp= 65.3 packed=57.5% disp=0.099
+  divon_test_T31   fill= 26.2 cog= 59.2 stab= 55.5 place=100.0 soft=100.0 | comp= 68.2 packed=41.0% disp=0.098
+  == norm%=25.93 fill=24.00 cog=60.52 stab=47.66 place=95.10 soft=93.50 | COMPOSITE=64.16 packed=46.4%  [226s]

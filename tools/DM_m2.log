@@ -1,0 +1,65 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### DM_m2  overrides=['a:SMALL_SEEDS_MARGIN=2'] patch=none
+  M07_00_N         fill= 41.9 cog= 51.9 stab= 31.0 place= 50.0 soft= 75.0 | comp= 49.9 packed=42.2% disp=0.093
+  M07_01_S         fill= 34.5 cog= 52.8 stab= 36.6 place=100.0 soft=100.0 | comp= 64.8 packed=55.6% disp=0.173
+  M07_02_N         fill= 39.5 cog= 53.6 stab= 32.5 place=100.0 soft=100.0 | comp= 65.1 packed=66.7% disp=0.157
+  M07_03_S         fill= 25.9 cog= 58.1 stab= 39.0 place= 50.0 soft=100.0 | comp= 54.6 packed=48.9% disp=0.162
+  M07_04_N         fill= 36.4 cog= 52.3 stab= 27.8 place=100.0 soft=100.0 | comp= 63.3 packed=46.7% disp=0.176
+  M07_05_S         fill= 25.3 cog= 52.1 stab= 20.4 place=100.0 soft=100.0 | comp= 59.6 packed=35.6% disp=0.273
+  M07_06_N         fill= 42.3 cog= 50.7 stab= 39.0 place= 80.0 soft=100.0 | comp= 62.4 packed=75.6% disp=0.156
+  M07_07_S         fill= 32.0 cog= 50.0 stab= 44.5 place= 66.7 soft=100.0 | comp= 58.6 packed=42.2% disp=0.101
+  M07_08_N         fill= 46.1 cog= 51.6 stab= 22.9 place=100.0 soft=100.0 | comp= 64.1 packed=46.7% disp=0.135
+  M07_09_S         fill= 29.7 cog= 50.0 stab= 34.7 place= 83.3 soft=100.0 | comp= 59.5 packed=40.0% disp=0.115
+  M07_10_N         fill= 34.5 cog= 52.1 stab= 27.9 place= 50.0 soft=100.0 | comp= 52.9 packed=35.6% disp=0.126
+  M07_11_S         fill= 35.7 cog= 55.5 stab= 32.9 place=100.0 soft=100.0 | comp= 64.8 packed=60.0% disp=0.132
+  M12_00_N         fill= 40.3 cog= 51.3 stab= 29.9 place= 50.0 soft=100.0 | comp= 54.3 packed=42.2% disp=0.128
+  M12_01_S         fill= 28.0 cog= 55.8 stab= 30.5 place=100.0 soft=100.0 | comp= 62.8 packed=51.1% disp=0.175
+  M12_02_N         fill= 39.1 cog= 54.1 stab= 23.9 place=100.0 soft=100.0 | comp= 63.4 packed=53.3% disp=0.149
+  M12_03_S         fill= 27.9 cog= 53.1 stab= 28.4 place=100.0 soft=100.0 | comp= 61.9 packed=44.4% disp=0.196
+  M12_04_N         fill= 36.7 cog= 54.3 stab= 48.5 place=100.0 soft=100.0 | comp= 67.9 packed=66.7% disp=0.103
+  M12_05_S         fill= 33.0 cog= 50.1 stab= 42.6 place= 75.0 soft=100.0 | comp= 60.1 packed=55.6% disp=0.104
+  M12_06_N         fill= 40.6 cog= 52.8 stab= 33.7 place= 75.0 soft=100.0 | comp= 60.4 packed=64.4% disp=0.162
+  M12_07_S         fill= 37.9 cog= 51.7 stab= 28.1 place= 75.0 soft= 50.0 | comp= 48.5 packed=51.1% disp=0.201
+  M12_08_N         fill= 37.6 cog= 51.0 stab= 37.2 place=100.0 soft=100.0 | comp= 65.2 packed=60.0% disp=0.118
+  M12_09_S         fill= 21.9 cog= 55.9 stab= 31.4 place=100.0 soft= 70.0 | comp= 55.8 packed=42.2% disp=0.244
+  M12_10_N         fill= 40.6 cog= 50.5 stab= 25.3 place=100.0 soft=100.0 | comp= 63.3 packed=57.8% disp=0.171
+  M12_11_S         fill= 26.8 cog= 51.8 stab= 34.1 place= 50.0 soft=100.0 | comp= 52.5 packed=51.1% disp=0.137
+  M18_00_N         fill= 34.5 cog= 56.2 stab= 38.4 place=100.0 soft=100.0 | comp= 65.8 packed=62.2% disp=0.178
+  M18_01_S         fill= 28.3 cog= 53.9 stab= 41.1 place=100.0 soft= 83.3 | comp= 61.3 packed=48.9% disp=0.195
+  M18_02_N         fill= 46.4 cog= 50.6 stab= 35.6 place=100.0 soft=100.0 | comp= 66.5 packed=60.0% disp=0.106
+  M18_03_S         fill= 34.0 cog= 55.4 stab= 40.7 place= 83.3 soft=100.0 | comp= 62.7 packed=57.8% disp=0.123
+  M18_04_N         fill= 33.9 cog= 54.7 stab= 39.9 place= 83.3 soft=100.0 | comp= 62.4 packed=55.6% disp=0.112
+  M18_05_S         fill= 27.6 cog= 54.7 stab= 39.8 place= 50.0 soft=100.0 | comp= 54.4 packed=51.1% disp=0.137
+  M18_06_N         fill= 29.7 cog= 57.2 stab= 24.5 place=100.0 soft=100.0 | comp= 62.3 packed=48.9% disp=0.204
+  M18_07_S         fill= 34.6 cog= 53.9 stab= 34.0 place=100.0 soft=100.0 | comp= 64.5 packed=42.2% disp=0.169
+  M18_08_N         fill= 38.8 cog= 51.3 stab= 38.6 place= 87.5 soft=100.0 | comp= 63.2 packed=66.7% disp=0.122
+  M18_09_S         fill= 27.7 cog= 56.4 stab= 45.1 place=100.0 soft=100.0 | comp= 65.8 packed=48.9% disp=0.140
+  M18_10_N         fill= 37.2 cog= 53.2 stab= 15.5 place=100.0 soft=100.0 | comp= 61.2 packed=44.4% disp=0.236
+  M18_11_S         fill= 28.8 cog= 52.6 stab= 34.5 place= 87.5 soft=100.0 | comp= 60.7 packed=51.1% disp=0.176
+  M27_00_N         fill= 38.9 cog= 50.3 stab= 28.8 place=100.0 soft=100.0 | comp= 63.6 packed=55.6% disp=0.100
+  M27_01_S         fill= 31.4 cog= 52.0 stab= 37.5 place= 80.0 soft= 50.0 | comp= 50.2 packed=55.6% disp=0.161
+  M27_02_N         fill= 38.1 cog= 53.6 stab= 29.9 place=100.0 soft=100.0 | comp= 64.3 packed=62.2% disp=0.161
+  M27_03_S         fill= 40.0 cog= 49.5 stab= 31.6 place= 75.0 soft=100.0 | comp= 59.2 packed=51.1% disp=0.106
+  M27_04_N         fill= 37.3 cog= 50.7 stab= 26.1 place= 87.5 soft=100.0 | comp= 60.3 packed=44.4% disp=0.172
+  M27_05_S         fill= 33.2 cog= 52.7 stab= 44.7 place= 50.0 soft= 50.0 | comp= 46.1 packed=55.6% disp=0.106
+  M27_06_N         fill= 39.1 cog= 52.3 stab= 35.2 place=100.0 soft=100.0 | comp= 65.3 packed=60.0% disp=0.127
+  M27_07_S         fill= 25.4 cog= 55.2 stab= 32.2 place= 62.5 soft=100.0 | comp= 55.1 packed=46.7% disp=0.258
+  M27_08_N         fill= 39.8 cog= 49.1 stab= 44.5 place= 50.0 soft=100.0 | comp= 56.7 packed=68.9% disp=0.131
+  M27_09_S         fill= 26.7 cog= 54.5 stab= 46.0 place= 50.0 soft= 87.5 | comp= 52.9 packed=55.6% disp=0.100
+  M27_10_N         fill= 35.4 cog= 55.9 stab= 43.8 place=100.0 soft=100.0 | comp= 67.0 packed=62.2% disp=0.118
+  M27_11_S         fill= 33.5 cog= 53.3 stab= 38.8 place=100.0 soft= 50.0 | comp= 55.1 packed=57.8% disp=0.109
+  M45_00_N         fill= 35.8 cog= 52.0 stab= 29.1 place= 75.0 soft=100.0 | comp= 58.4 packed=62.2% disp=0.191
+  M45_01_S         fill= 32.4 cog= 50.2 stab= 35.9 place= 50.0 soft=100.0 | comp= 53.7 packed=57.8% disp=0.123
+  M45_02_N         fill= 39.9 cog= 52.9 stab= 34.4 place= 80.0 soft=100.0 | comp= 61.4 packed=64.4% disp=0.121
+  M45_03_S         fill= 30.2 cog= 55.6 stab= 36.6 place= 83.3 soft=100.0 | comp= 61.1 packed=57.8% disp=0.151
+  M45_04_N         fill= 34.3 cog= 54.6 stab= 60.5 place= 50.0 soft=100.0 | comp= 59.9 packed=64.4% disp=0.078
+  M45_05_S         fill= 35.5 cog= 53.2 stab= 36.8 place=100.0 soft=100.0 | comp= 65.1 packed=60.0% disp=0.155
+  M45_06_N         fill= 37.0 cog= 53.7 stab= 26.9 place= 87.5 soft=100.0 | comp= 61.0 packed=60.0% disp=0.172
+  M45_07_S         fill= 28.3 cog= 52.1 stab= 29.8 place= 50.0 soft=100.0 | comp= 52.0 packed=51.1% disp=0.187
+  M45_08_N         fill= 32.1 cog= 51.0 stab= 39.3 place= 83.3 soft=100.0 | comp= 61.1 packed=55.6% disp=0.138
+  M45_09_S         fill= 37.0 cog= 54.6 stab= 44.9 place=100.0 soft= 91.7 | comp= 65.6 packed=62.2% disp=0.090
+  M45_10_N         fill= 38.9 cog= 52.6 stab= 27.9 place=100.0 soft= 90.0 | comp= 61.9 packed=60.0% disp=0.167
+  M45_11_S         fill= 22.9 cog= 53.7 stab= 43.2 place= 75.0 soft= 50.0 | comp= 49.0 packed=40.0% disp=0.133
+  == norm%=35.88 fill=34.31 cog=52.97 stab=34.92 place=83.10 soft=94.12 | COMPOSITE=59.88 packed=54.1%  [3374s]

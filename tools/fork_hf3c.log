@@ -1,0 +1,71 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+  fork1c:ktest_L00              28/ 50 end=stuck   rescued=True  extra=+2 fork_s=   0.9 replay_ok=True
+  fork1c:ktest_L03              37/ 40 end=stuck   rescued=False extra=+0 fork_s=   2.8 replay_ok=True
+  fork1c:ktest_L04              36/ 45 end=stuck   rescued=False extra=+0 fork_s=   5.7 replay_ok=True
+  fork1c:ktest_L06              29/ 40 end=stuck   rescued=True  extra=+1 fork_s=   1.7 replay_ok=True
+  fork1c:ktest_L07              27/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:ktest_L08              34/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:ktest_L09              32/ 40 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:ktest_L10              31/ 50 end=stuck   rescued=False extra=+0 fork_s=   6.0 replay_ok=True
+  fork1c:ktest_L16              22/ 45 end=topple  rescued=False extra=+0 fork_s=   0.2 replay_ok=True
+  fork1c:ktest_L17              30/ 50 end=stuck   rescued=True  extra=+1 fork_s=   1.8 replay_ok=True
+  fork1c:ktest_L18              36/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.2 replay_ok=True
+  fork1c:ktest_L21              28/ 50 end=stuck   rescued=False extra=+0 fork_s=   5.1 replay_ok=True
+  fork1c:ktest_L23              29/ 50 end=stuck   rescued=True  extra=+2 fork_s=   2.1 replay_ok=True
+  fork1c:ktest_L24              30/ 45 end=stuck   rescued=True  extra=+2 fork_s=   1.1 replay_ok=True
+  fork1c:ktest_L26              21/ 45 end=stuck   rescued=True  extra=+2 fork_s=   2.3 replay_ok=True
+  fork1c:ktest_L27              32/ 40 end=stuck   rescued=False extra=+0 fork_s=   6.2 replay_ok=True
+  fork1c:ktest_L28              40/ 45 end=stuck   rescued=True  extra=+1 fork_s=   1.0 replay_ok=True
+  fork1c:ktest_L29              33/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:ktest_L30              27/ 40 end=stuck   rescued=False extra=+0 fork_s=   3.2 replay_ok=True
+  fork1c:ktest_L31              25/ 40 end=stuck   rescued=False extra=+0 fork_s=   5.9 replay_ok=True
+  fork1c:pool_P00               31/ 40 end=stuck   rescued=False extra=+0 fork_s=   1.5 replay_ok=True
+  fork1c:pool_P02               32/ 45 end=stuck   rescued=True  extra=+1 fork_s=   5.0 replay_ok=True
+  fork1c:pool_P10               22/ 45 end=stuck   rescued=False extra=+0 fork_s=   2.7 replay_ok=True
+  fork1c:pool_P11               25/ 40 end=stuck   rescued=False extra=+0 fork_s=   3.6 replay_ok=True
+  fork1c:pool_P16               40/ 40 end=all     rescued=False extra=+0 fork_s=   0.0 replay_ok=None
+  fork1c:pool_P20               28/ 40 end=stuck   rescued=False extra=+0 fork_s=   4.9 replay_ok=True
+  fork1c:pool_P26               31/ 45 end=stuck   rescued=False extra=+0 fork_s=   1.6 replay_ok=True
+  fork1c:pool_P27               23/ 50 end=topple  rescued=False extra=+0 fork_s=   2.0 replay_ok=True
+  fork1c:pool_P28               32/ 50 end=stuck   rescued=False extra=+0 fork_s=   1.5 replay_ok=True
+  fork1c:pool_P29               30/ 50 end=stuck   rescued=False extra=+0 fork_s=   1.5 replay_ok=True
+  fork1c:shelftest_T00          30/ 45 end=stuck   rescued=True  extra=+1 fork_s=   3.0 replay_ok=True
+  fork1c:shelftest_T01          26/ 50 end=stuck   rescued=True  extra=+2 fork_s=   2.1 replay_ok=True
+  fork1c:shelftest_T02          28/ 45 end=stuck   rescued=True  extra=+1 fork_s=   1.3 replay_ok=True
+  fork1c:shelftest_T06          27/ 40 end=stuck   rescued=True  extra=+4 fork_s=   3.5 replay_ok=True
+  fork1c:shelftest_T08          29/ 40 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:shelftest_T09          28/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:shelftest_T10          28/ 50 end=stuck   rescued=False extra=+0 fork_s=   5.9 replay_ok=True
+  fork1c:shelftest_T11          30/ 45 end=stuck   rescued=True  extra=+1 fork_s=   1.3 replay_ok=True
+  fork1c:shelftest_T12          25/ 40 end=stuck   rescued=True  extra=+1 fork_s=   6.3 replay_ok=True
+  fork1c:shelftest_T14          32/ 50 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:shelftest_T15          22/ 45 end=topple  rescued=False extra=+0 fork_s=   0.5 replay_ok=True
+  fork1c:shelftest_T19          30/ 50 end=stuck   rescued=True  extra=+3 fork_s=   2.2 replay_ok=True
+  fork1c:shelftest_T23          20/ 50 end=topple  rescued=False extra=+0 fork_s=   1.2 replay_ok=True
+  fork1c:shelftest_T24          28/ 40 end=stuck   rescued=True  extra=+1 fork_s=   4.2 replay_ok=True
+  fork1c:shelftest_T25          28/ 50 end=stuck   rescued=False extra=+0 fork_s=   6.3 replay_ok=True
+  fork1c:shelftest_T28          29/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.2 replay_ok=True
+  fork1c:shelftest_T29          25/ 50 end=stuck   rescued=True  extra=+2 fork_s=   0.7 replay_ok=True
+  fork1c:shelftest_T30          27/ 45 end=stuck   rescued=False extra=+0 fork_s=   6.1 replay_ok=True
+  fork1c:test_T01               32/ 40 end=stuck   rescued=True  extra=+4 fork_s=   2.7 replay_ok=True
+  fork1c:test_T03               25/ 40 end=stuck   rescued=False extra=+0 fork_s=   2.4 replay_ok=True
+  fork1c:test_T05               30/ 40 end=stuck   rescued=False extra=+0 fork_s=   1.1 replay_ok=True
+  fork1c:test_T06               16/ 40 end=topple  rescued=False extra=+0 fork_s=   0.2 replay_ok=True
+  fork1c:test_T07               29/ 50 end=stuck   rescued=True  extra=+1 fork_s=   3.7 replay_ok=True
+  fork1c:test_T09               34/ 40 end=stuck   rescued=False extra=+0 fork_s=   5.1 replay_ok=True
+  fork1c:test_T11               29/ 50 end=stuck   rescued=True  extra=+1 fork_s=   1.7 replay_ok=True
+  fork1c:test_T14               23/ 40 end=topple  rescued=False extra=+0 fork_s=   1.5 replay_ok=True
+  fork1c:test_T17               31/ 45 end=stuck   rescued=True  extra=+1 fork_s=   1.6 replay_ok=True
+  fork1c:test_T20               26/ 40 end=stuck   rescued=False extra=+0 fork_s=   4.3 replay_ok=True
+  fork1c:test_T24               37/ 40 end=stuck   rescued=False extra=+0 fork_s=   1.7 replay_ok=True
+  fork1c:test_T27               29/ 45 end=stuck   rescued=True  extra=+3 fork_s=   2.9 replay_ok=True
+  fork1c:test_T30               32/ 40 end=stuck   rescued=False extra=+0 fork_s=   4.6 replay_ok=True
+== hf3c: 61 scenes, 60 ended early, rescued 22; extra items per early-ended scene 0.63
+   end=stuck   n= 54 rescued= 22 extra/scene=0.70
+   end=topple  n=  6 rescued=  0 extra/scene=0.00

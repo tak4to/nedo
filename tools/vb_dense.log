@@ -1,0 +1,22 @@
+pybullet build time: Aug 29 2026 17:03:42
+D00   items= 51.7%  under_static=  6.2%  enclosed=  5.3%  ceil_dead=  5.2%  sliver= 27.0%  wide_open=  4.2%  | above-sky air: sealed= 13.0% reachable= 23.4%   (dmin=0.24, need_h=0.27, need_w=0.284)
+D03   items= 53.8%  under_static=  3.5%  enclosed=  5.9%  ceil_dead=  4.7%  sliver= 26.1%  wide_open=  5.7%  | above-sky air: sealed= 14.7% reachable= 21.9%   (dmin=0.20, need_h=0.23, need_w=0.244)
+D04   items= 46.6%  under_static= 11.7%  enclosed=  4.4%  ceil_dead=  2.7%  sliver= 26.8%  wide_open=  6.4%  | above-sky air: sealed=  4.1% reachable= 31.9%   (dmin=0.23, need_h=0.26, need_w=0.274)
+D05   items= 54.1%  under_static=  8.6%  enclosed=  1.6%  ceil_dead=  5.1%  sliver= 16.8%  wide_open= 13.1%  | above-sky air: sealed= 16.9% reachable= 18.1%   (dmin=0.23, need_h=0.26, need_w=0.274)
+D06   items= 50.5%  under_static=  8.4%  enclosed=  2.7%  ceil_dead=  5.3%  sliver= 23.0%  wide_open=  9.5%  | above-sky air: sealed= 16.3% reachable= 21.6%   (dmin=0.23, need_h=0.26, need_w=0.274)
+D07   items= 55.7%  under_static=  8.6%  enclosed=  2.8%  ceil_dead=  8.8%  sliver= 21.5%  wide_open=  2.0%  | above-sky air: sealed= 15.2% reachable= 17.2%   (dmin=0.24, need_h=0.27, need_w=0.284)
+== 平均（コンテナ容積に対する%）
+  items         52.1%
+  under_static   7.8%
+  enclosed       3.8%
+  ceil_dead      5.3%
+  sliver        23.6%
+  wide           6.8%
+  sealed        13.3%
+  reach         22.3%
+argv[0]=
+argv[0]=
+argv[0]=
+argv[0]=
+argv[0]=
+argv[0]=
