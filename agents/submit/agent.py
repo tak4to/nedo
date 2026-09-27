@@ -239,7 +239,7 @@ def _fallback_action(observation, deadline=None, twins=None, pool_list_raw=None)
         spec0 = pool[0][1]
         _, _, hz = geometry.half_extents(spec0['length'], spec0['width'], spec0['height'], 0)
         pos = ((g['x_lo'] + g['x_hi']) / 2.0, (g['y_lo'] + g['y_hi']) / 2.0,
-               g['floor_struct_z'] + geometry.FLOOR_LIFT + hz)
+               g['floor_z'] + geometry.FLOOR_LIFT + hz)
         return {
             'item_idx': 0, 'container_idx': int(cidx0),
             'place_pos': np.array(pos, dtype=np.float32),

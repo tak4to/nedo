@@ -126,7 +126,16 @@ def container_geometry(cdict):
             diag_n, diag_p = n, p
             break
 
+    # Two different "floors". The body sits `buffer` above the origin, so the
+    # floor surface items actually rest on -- and the floor inclusion plane --
+    # is at thickness + buffer (floor_z). The validator's lift rule, though,
+    # tests the floor at plain `thickness` (validator.py resting_surfaces),
+    # so floor_struct_z stays exactly that and is used only to mirror it.
+    # Placing on floor_struct_z put every floor candidate inside the
+    # inclusion pad once buffer > 0.005, i.e. nothing could go on the floor
+    # (simulator default buffer is 0.01; every local scene used 0.0).
     floor_struct_z = thickness
+    floor_z = thickness + buffer
     shelf_struct_z = height / 2.0 + thickness + buffer
 
     small_shelf_center = (-(length / 2.0 - cut_x / 2.0 - thickness), 0.0,
@@ -148,7 +157,8 @@ def container_geometry(cdict):
         'has_shelf': bool(cdict.get('shelf', False)),
         'points_local': points_local, 'n_vecs': n_vecs,
         'diag_n': diag_n, 'diag_p': diag_p,
-        'floor_struct_z': floor_struct_z, 'shelf_struct_z': shelf_struct_z,
+        'floor_struct_z': floor_struct_z, 'floor_z': floor_z,
+        'shelf_struct_z': shelf_struct_z,
         'static_boxes': static_boxes,
         # Usable design box, mirroring the 7 real inclusion planes with
         # WALL_CLEARANCE of slack. These are only *candidate-generation*
