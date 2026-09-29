@@ -1,0 +1,32 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### SS_suite  overrides=['a:OFFLINE_SMALL_SEEDS=1'] patch=none
+  A01_1c_40_plain  fill= 15.0 cog= 57.0 stab= 40.4 place=100.0 soft=100.0 | comp= 62.5 packed=37.5% disp=0.558
+  A02_1c_80_plain  fill= 29.8 cog= 52.5 stab= 51.6 place=100.0 soft=100.0 | comp= 66.8 packed=36.2% disp=0.242
+  A03_1c_40_shelf  fill= 23.6 cog= 46.6 stab= 57.0 place=100.0 soft=100.0 | comp= 65.4 packed=47.5% disp=0.343
+  A04_2c_80_noprio fill= 34.0 cog= 53.1 stab= 58.3 place= 85.7 soft=100.0 | comp= 66.2 packed=58.8% disp=0.186
+  A05_2c_80_prio   fill= 30.5 cog= 49.7 stab= 49.8 place= 94.4 soft=100.0 | comp= 64.9 packed=57.5% disp=0.269
+  A06_1c_40_small  fill= 14.2 cog= 56.5 stab= 51.0 place=100.0 soft=100.0 | comp= 64.4 packed=100.0% disp=0.659
+  A07_1c_40_bulky  fill= 34.3 cog= 61.6 stab= 73.7 place=100.0 soft=100.0 | comp= 73.9 packed=27.5% disp=0.055
+  A08_2c_140_extreme fill= 22.8 cog= 54.7 stab= 50.1 place= 86.4 soft=100.0 | comp= 62.8 packed=37.1% disp=0.399
+  B01_1c_40_plain  fill= 33.0 cog= 63.3 stab= 59.8 place=100.0 soft= 80.0 | comp= 67.2 packed=72.5% disp=0.207
+  B02_1c_40_shelf  fill= 28.4 cog= 53.1 stab= 61.7 place=100.0 soft= 50.0 | comp= 58.6 packed=50.0% disp=0.226
+  B03_2c_80_prio   fill= 28.4 cog= 56.1 stab= 53.3 place=100.0 soft= 64.3 | comp= 60.4 packed=35.0% disp=0.135
+  B04_2c_80_noprio fill= 33.4 cog= 50.0 stab= 64.0 place=100.0 soft= 71.4 | comp= 63.8 packed=57.5% disp=0.165
+  C01_1c_40_shelf  fill= 31.5 cog= 46.3 stab= 59.0 place= 75.0 soft= 50.0 | comp= 52.4 packed=60.0% disp=0.145
+  C02_2c_55_shelfprio fill= 24.9 cog= 51.4 stab= 49.8 place= 72.2 soft=100.0 | comp= 59.7 packed=74.5% disp=0.313
+  C03_2c_80_prio   fill= 36.6 cog= 50.1 stab= 56.5 place= 91.7 soft=100.0 | comp= 67.0 packed=60.0% disp=0.163
+  D01_A_1c_40_softheavy fill= 39.7 cog= 44.9 stab= 64.7 place= 90.0 soft= 93.8 | comp= 66.6 packed=60.0% disp=0.118
+  D02_A_1c_40_prioheavy_nocont fill= 29.1 cog= 56.6 stab= 58.0 place= 95.0 soft=100.0 | comp= 67.7 packed=60.0% disp=0.235
+  D03_A_2c_60_prioheavy_cont fill= 40.8 cog= 55.6 stab= 60.5 place= 95.8 soft= 75.0 | comp= 65.6 packed=80.0% disp=0.138
+  D04_A_1c_40_flat fill= 32.3 cog= 51.5 stab= 56.1 place= 60.0 soft=100.0 | comp= 60.0 packed=62.5% disp=0.325
+  D05_A_1c_40_tall fill= 36.2 cog= 53.0 stab= 56.8 place=100.0 soft=100.0 | comp= 69.2 packed=70.0% disp=0.172
+  P01_A_1c_pre6    fill= 31.4 cog= 67.2 stab= 52.7 place= 75.0 soft=100.0 | comp= 65.3 packed=65.0% disp=0.190
+  P02_A_1c_pre10   fill= 28.7 cog= 64.4 stab= 49.4 place=100.0 soft=100.0 | comp= 68.5 packed=62.0% disp=0.220
+  P03_A_2c_pre8_prio fill= 30.4 cog= 63.7 stab= 55.2 place= 85.7 soft=100.0 | comp= 67.0 packed=72.1% disp=0.196
+  P04_B_1c_pre8_shelf fill= 29.7 cog= 65.2 stab= 70.4 place= 75.0 soft= 66.7 | comp= 61.4 packed=57.1% disp=0.080
+  P05_C_2c_pre8_shelfprio fill= 14.2 cog= 64.4 stab= 46.7 place= 90.0 soft= 50.0 | comp= 53.1 packed=51.7% disp=0.358
+  P06_A_1c_pre12_dense fill= 26.0 cog= 70.5 stab= 59.5 place=100.0 soft= 83.3 | comp= 67.9 packed=61.9% disp=0.127
+  == norm%=33.10 fill=29.18 cog=56.12 stab=56.39 place=91.23 soft=87.86 | COMPOSITE=64.15 packed=58.2%  [1061s]

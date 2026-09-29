@@ -1,0 +1,11 @@
+pybullet build time: Aug 29 2026 17:03:42
+### SB_pub_fast  overrides=[] patch=none
+  P00              fill= 22.4 cog= 60.3 stab= 43.9 place=100.0 soft=100.0 | comp= 65.3 packed=72.5% disp=0.147
+  P01              fill= 30.1 cog= 58.0 stab= 37.7 place=100.0 soft= 95.0 | comp= 64.2 packed=57.0% disp=0.165
+  P02              fill= 30.1 cog= 56.8 stab= 44.8 place=100.0 soft=100.0 | comp= 66.3 packed=68.9% disp=0.165
+  P03              fill= 27.9 cog= 58.2 stab= 32.9 place=100.0 soft=100.0 | comp= 63.8 packed=48.0% disp=0.200
+  P07              fill= 37.5 cog= 54.1 stab= 31.4 place=100.0 soft=100.0 | comp= 64.6 packed=61.1% disp=0.169
+  P10              fill= 28.6 cog= 57.7 stab= 29.5 place= 72.2 soft=100.0 | comp= 57.6 packed=51.1% disp=0.252
+  P16              fill= 33.2 cog= 59.2 stab= 39.7 place= 50.0 soft= 83.3 | comp= 53.1 packed=77.5% disp=0.187
+  P18              fill= 30.1 cog= 59.8 stab= 50.5 place=100.0 soft=100.0 | comp= 68.1 packed=67.5% disp=0.137
+  == norm%=41.97 fill=30.00 cog=58.01 stab=38.83 place=90.28 soft=97.29 | COMPOSITE=62.88 packed=63.0%  [356s]

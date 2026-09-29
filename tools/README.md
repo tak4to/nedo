@@ -128,6 +128,9 @@ cd tools
 | `scenes_test.json` (32) | **ホールドアウト**。採用直前の再現確認にだけ使う |
 | `scenes_off40.json` (40) | オフライン専用。`optimize` の比較用 |
 | `scenes_offline.json` (16) | 同上の小型版 |
+| `scenes_dense.json` (32) / `scenes_densetest.json` (32) | **現場密度（1台あたり50〜60個）**。dev / ホールドアウト。`poolgen_dense.py` で生成。他の集合は40〜50個/台で、荷物がコンテナ容量を明確に超える状況を一度も測っていなかった（JAL羽田の実測は50〜60個/台、`docs/2026-09-23-現場の実務と再現・優先度.md`） |
+| `scenes_div44.json` (44) / `scenes_divon.json` (38) | 寸法が多様な荷物（乱数寸法）。課題A相当 / オンライン。公式カタログは7種類しかないので、強い異種混合での頑健性を見る用 |
+| `scenes_pubsuite.json` (26) | 公開リポジトリのシーン設定を入力として借りたもの（比較用。合わせ込まない） |
 
 **スイープの最大値をそのまま採用しないこと。** 別集合で再現を確認する
 （`docs/RESEARCH.md` §5）。
@@ -217,3 +220,15 @@ cd tools
   ../.venv/bin/python probe_opt.py                    # R000、150秒フル
   ../.venv/bin/python probe_opt.py --budget 12        # 短縮スモーク
   ```
+
+## 提出前点検・提出物生成（2026-09-21、docs/2026-09-21-top10戦略の照合.md）
+
+| ファイル | 用途 |
+| --- | --- |
+| `preflight.py` | 提出 zip をクリーン展開し、本物の `EvaluationApp` で完走させて import・時間・メモリの余裕を判定。`--cpus 4 --load 2` で評価基盤相当の遅さを再現。終了コード 0=PASS |
+| `make_variant.py` | `agents/submit` から**定数1行だけ**違う zip を `agents/variants/` に生成（提出枠での1変数スイープ用）。`--list-sweep` で A-4 の5本 |
+
+```bash
+../.venv/bin/python preflight.py --zip ../agents/submit.zip --cpus 4 --load 2
+../.venv/bin/python make_variant.py SUPPORT_CENTROID_TOL=0.55
+```

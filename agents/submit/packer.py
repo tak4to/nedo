@@ -387,7 +387,7 @@ def _waste_depths(cstate, cands):
     y0, y1 = g['y_lo'], g['y_hi']
     nx = max(int((x1 - x0) / WASTE_CELL) + 1, 1)
     ny = max(int((y1 - y0) / WASTE_CELL) + 1, 1)
-    H = np.full((nx, ny), g['floor_struct_z'], dtype=np.float64)
+    H = np.full((nx, ny), g['floor_z'], dtype=np.float64)
     for b in cstate.boxes + cstate.static_obstacles:
         bcx, bcy, bcz = b['center']
         bhx, bhy, bhz = b['half']
@@ -494,7 +494,7 @@ def _height_map(cstate, cell, extra=None):
     y0, y1 = g['y_lo'], g['y_hi']
     nx = max(int((x1 - x0) / cell) + 1, 1)
     ny = max(int((y1 - y0) / cell) + 1, 1)
-    H = np.full((nx, ny), g['floor_struct_z'], dtype=np.float64)
+    H = np.full((nx, ny), g['floor_z'], dtype=np.float64)
     boxes = [(b['center'][0], b['center'][1], b['half'][0], b['half'][1],
               b['center'][2] + b['half'][2])
              for b in cstate.boxes + cstate.static_obstacles]
@@ -654,7 +654,7 @@ class ContainerState:
     def _refresh(self):
         self.floor_boxes = [
             b for b in self.boxes
-            if abs((b['center'][2] - b['half'][2]) - self.geom['floor_struct_z']) < 0.03
+            if abs((b['center'][2] - b['half'][2]) - self.geom['floor_z']) < 0.03
         ]
         # Flattened, top-height-descending view of every obstacle, for
         # _landing. Rebuilt per commit (O(n log n) on <100 boxes) and read
@@ -735,7 +735,7 @@ def _landing(cstate, cx, cy, hx, hy, inset=0.004):
     """
     ex = hx - inset
     ey = hy - inset
-    floor = cstate.geom['floor_struct_z']
+    floor = cstate.geom['floor_z']
     support_top = floor
     supporters = None
     limit = floor - TOP_TOL
@@ -796,7 +796,7 @@ def _landing_under(cstate, cx, cy, hx, hy, inset=0.004):
                 ceil = bot
     if ceil is None:
         return None
-    floor = cstate.geom['floor_struct_z']
+    floor = cstate.geom['floor_z']
     if ceil <= floor + 0.05:
         return None
     support_top = floor
@@ -833,7 +833,7 @@ def _bottom_for_support(cgeom, support_top, support, half_z):
     if support is None:
         # The container floor is never collision-checked during transport,
         # but the floor *is* one of the inclusion planes, so keep clear.
-        return cgeom['floor_struct_z'] + FLOOR_LIFT
+        return cgeom['floor_z'] + FLOOR_LIFT
     if any(b['is_static'] for b in support):
         return support_top + SUPPORT_LIFT
     eff = resting_eff_start_z(cgeom, support_top + half_z, half_z)
@@ -1153,7 +1153,7 @@ def _xy_candidates(cstate, fx, fy, walls, hz):
     changes are structurally safe in a way restrictive ones are not)."""
     g = cstate.geom
     xs = {g['x_lo'], g['x_hi'] - fx}
-    diag_x = diagonal_corner_x(g, g['floor_struct_z'] + FLOOR_LIFT + hz, fx / 2.0, hz)
+    diag_x = diagonal_corner_x(g, g['floor_z'] + FLOOR_LIFT + hz, fx / 2.0, hz)
     if diag_x > g['x_lo'] + 1e-6:
         xs.add(diag_x)
     for b in cstate.boxes + cstate.static_obstacles:
@@ -1179,10 +1179,23 @@ def _grid_xy(cstate, fx, fy, step, walls):
     return [(x, y, w) for (y, w) in _y_candidates(cstate, fy, walls) for x in xs]
 
 
-def _collect(cstate, item_spec, relax, xy_fn):
+# _collect checks the clock once per this many (x, y) corners: a
+# perf_counter call costs about as much as a few corners' arithmetic, and
+# 32 corners take well under a millisecond.
+_DEADLINE_STRIDE_MASK = 31
+
+
+def _collect(cstate, item_spec, relax, xy_fn, time_deadline=None):
     """Build the scored candidate list using `xy_fn` to propose corners.
     The resting height is derived per candidate from where the item would
-    land, so only (x, y, orientation) has to be enumerated."""
+    land, so only (x, y, orientation) has to be enumerated.
+
+    Returns [] once `time_deadline` has passed. That is exactly what the
+    caller would have got anyway -- _first_valid stops at its first
+    candidate when the deadline is already behind it -- but without this
+    the enumeration itself ran unchecked, and with many small items one
+    call took 2-4 s, long enough to push policy() past the hard 8 s limit
+    (a timeout plays a random action and ends the episode)."""
     g = cstate.geom
     length, width, height = item_spec['length'], item_spec['width'], item_spec['height']
     mass = float(item_spec.get('mass', 1.0))
@@ -1203,12 +1216,17 @@ def _collect(cstate, item_spec, relax, xy_fn):
     use_corridor = bool(W_CORRIDOR)  # separate gate: O(n_boxes), not O(n_support)
 
     candidates = []
+    n_seen = 0
     for orn in ALL_ORNS:
         hx, hy, hz = half_extents(length, width, height, orn)
         fx, fy, fz = 2 * hx, 2 * hy, 2 * hz
         if fz > max_h:
             continue
         for (x_left, y_back, wall) in xy_fn(cstate, fx, fy, walls, hz):
+            n_seen += 1
+            if (time_deadline is not None and not n_seen & _DEADLINE_STRIDE_MASK
+                    and time.perf_counter() > time_deadline):
+                return []
             cx = x_left + hx
             cy = y_back - hy
             support_top, support = _landing(cstate, cx, cy, hx, hy)
@@ -1246,6 +1264,10 @@ def _collect(cstate, item_spec, relax, xy_fn):
             if fz > max_h:
                 continue
             for (x_left, y_back, _wall) in xy_fn(cstate, fx, fy, walls, hz):
+                n_seen += 1
+                if (time_deadline is not None and not n_seen & _DEADLINE_STRIDE_MASK
+                        and time.perf_counter() > time_deadline):
+                    return []
                 cx = x_left + hx
                 cy = y_back - hy
                 found = _landing_under(cstate, cx, cy, hx, hy)
@@ -1262,6 +1284,8 @@ def _collect(cstate, item_spec, relax, xy_fn):
                 score = (W_BACK * y_back - W_LOW * bottom - W_FLAT * fz - W_LEFT * x_left
                          - W_MASS_HIGH * mass * bottom)
                 candidates.append((score, cx, cy, bottom + hz, hx, hy, hz, orn, support, fx, fy))
+    if time_deadline is not None and time.perf_counter() > time_deadline:
+        return []
     if W_WASTE and candidates:
         depths = _waste_depths(cstate, candidates)
         candidates = [(c[0] - W_WASTE * float(d),) + c[1:]
@@ -1384,7 +1408,8 @@ def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_s
     `_footprint_supported` via `_first_valid` -- see there for what they
     relax and why.
     """
-    result = _first_valid(cstate, _collect(cstate, item_spec, relax, _xy_candidates),
+    result = _first_valid(cstate, _collect(cstate, item_spec, relax, _xy_candidates,
+                                           time_deadline),
                           time_deadline, require_support, verify, min_cover, require_centroid,
                           types)
     if result is not None:
@@ -1393,7 +1418,8 @@ def best_placement(cstate, item_spec, time_deadline=None, relax=False, require_s
         if time_deadline is not None and time.perf_counter() > time_deadline:
             break
         cands = _collect(cstate, item_spec, relax,
-                         lambda cs, fx, fy, walls, hz, _s=step: _grid_xy(cs, fx, fy, _s, walls))
+                         lambda cs, fx, fy, walls, hz, _s=step: _grid_xy(cs, fx, fy, _s, walls),
+                         time_deadline)
         result = _first_valid(cstate, cands, time_deadline, require_support, verify,
                               min_cover, require_centroid, types)
         if result is not None:

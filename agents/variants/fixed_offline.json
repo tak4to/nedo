@@ -1,0 +1,17 @@
+{
+  "tag": "fixed_offline",
+  "base": {
+    "agent.py": "fcb7b6f20798",
+    "twin.py": "e5b0dc4a8a35",
+    "geometry.py": "e075a840f101",
+    "packer.py": "eeebe44e748f"
+  },
+  "changes": [
+    {
+      "name": "OFFLINE_SEARCH",
+      "file": "agent.py",
+      "old": "OFFLINE_SEARCH = 'lns'",
+      "new": "OFFLINE_SEARCH = 'fixed'"
+    }
+  ]
+}

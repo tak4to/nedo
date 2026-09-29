@@ -1,0 +1,37 @@
+== E1A
+   pool       dpct=+2.47 (se 1.68)  dcomp=-0.06  stuck-scenes dpct=-0.64  topple 7->7  step 59.63->62.65
+   ktest      dpct=+0.80 (se 1.44)  dcomp=+0.41  stuck-scenes dpct=+0.10  topple 4->4  step 64.04->64.46
+   shelftest  dpct=-0.59 (se 1.31)  dcomp=+0.48  stuck-scenes dpct=-2.10  topple 5->2  step 59.79->61.08
+   test       dpct=+1.84 (se 1.98)  dcomp=+0.20  stuck-scenes dpct=-1.11  topple 10->10  step 61.03->62.50
+   UNSEEN(96) dpct=+0.68 (se 0.92)  dcomp=+0.36  stuck-scenes dpct=-1.02 (n=77)   -
+== E1A_t
+   pool       dpct=+1.69 (se 1.78)  dcomp=+0.08  stuck(biased-) dpct=-0.28  topple 7->7  step 59.63->61.50
+   ktest      dpct=+0.99 (se 1.00)  dcomp=+0.23  stuck(biased-) dpct=+0.46  topple 4->4  step 64.04->64.27
+   shelftest  dpct=-0.41 (se 1.39)  dcomp=+0.73  stuck(biased-) dpct=-2.19  topple 5->2  step 59.79->61.33
+   test       dpct=+0.97 (se 2.15)  dcomp=+0.03  stuck(biased-) dpct=-1.17  topple 10->9  step 61.03->60.11
+   UNSEEN(96) dpct=+0.52 (se 0.91)  dcomp=+0.33  stuck(biased-) dpct=-0.93 (n=77)   -
+== E1B
+   pool       dpct=+2.58 (se 1.67)  dcomp=-0.95  stuck(biased-) dpct=-0.23  topple 7->9  step 59.63->61.12
+   ktest      dpct=-1.63 (se 1.68)  dcomp=-0.15  stuck(biased-) dpct=-1.32  topple 4->5  step 64.04->62.71
+   shelftest  dpct=-0.41 (se 1.59)  dcomp=+0.23  stuck(biased-) dpct=-1.95  topple 5->5  step 59.79->60.19
+   test       dpct=+3.36 (se 1.83)  dcomp=-0.64  stuck(biased-) dpct=-1.11  topple 10->9  step 61.03->62.91
+   UNSEEN(96) dpct=+0.44 (se 1.00)  dcomp=-0.18  stuck(biased-) dpct=-1.48 (n=77)   -
+== E1B_t
+   pool       dpct=+2.86 (se 2.01)  dcomp=-0.51  stuck(biased-) dpct=-0.07  topple 7->8  step 59.63->60.27
+   ktest      dpct=-0.20 (se 1.53)  dcomp=+0.13  stuck(biased-) dpct=-0.40  topple 4->6  step 64.04->62.99
+   shelftest  dpct=-0.26 (se 1.60)  dcomp=+0.40  stuck(biased-) dpct=-1.77  topple 5->6  step 59.79->60.36
+   test       dpct=+3.93 (se 2.09)  dcomp=-1.09  stuck(biased-) dpct=-1.78  topple 10->8  step 61.03->63.91
+   UNSEEN(96) dpct=+1.16 (se 1.02)  dcomp=-0.19  stuck(biased-) dpct=-1.27 (n=77)   -
+== E1C
+   pool       dpct=-0.09 (se 2.78)  dcomp=+0.08  stuck(biased-) dpct=-1.78  topple 7->9  step 59.63->58.53
+   ktest      dpct=-1.34 (se 1.32)  dcomp=-0.01  stuck(biased-) dpct=-0.95  topple 4->5  step 64.04->63.24
+   shelftest  dpct=+0.36 (se 1.30)  dcomp=+0.36  stuck(biased-) dpct=-0.75  topple 5->4  step 59.79->61.73
+   test       dpct=+2.83 (se 2.12)  dcomp=-0.08  stuck(biased-) dpct=-0.92  topple 10->10  step 61.03->64.24
+   UNSEEN(96) dpct=+0.62 (se 0.94)  dcomp=+0.09  stuck(biased-) dpct=-0.87 (n=77)   -
+== E1C_t
+   pool       dpct=+0.31 (se 2.75)  dcomp=-0.42  stuck(biased-) dpct=-1.26  topple 7->8  step 59.63->59.14
+   ktest      dpct=-0.69 (se 1.17)  dcomp=+0.25  stuck(biased-) dpct=-1.15  topple 4->3  step 64.04->63.49
+   shelftest  dpct=+0.73 (se 1.27)  dcomp=+0.10  stuck(biased-) dpct=-0.15  topple 5->5  step 59.79->61.47
+   test       dpct=+2.19 (se 2.18)  dcomp=-0.48  stuck(biased-) dpct=-1.85  topple 10->10  step 61.03->63.85
+   UNSEEN(96) dpct=+0.74 (se 0.93)  dcomp=-0.04  stuck(biased-) dpct=-1.00 (n=77)   -
+ALLDONE

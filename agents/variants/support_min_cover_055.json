@@ -1,0 +1,17 @@
+{
+  "tag": "support_min_cover_055",
+  "base": {
+    "agent.py": "fcb7b6f20798",
+    "twin.py": "e5b0dc4a8a35",
+    "geometry.py": "e075a840f101",
+    "packer.py": "eeebe44e748f"
+  },
+  "changes": [
+    {
+      "name": "SUPPORT_MIN_COVER",
+      "file": "packer.py",
+      "old": "SUPPORT_MIN_COVER = 0.62978",
+      "new": "SUPPORT_MIN_COVER = 0.55"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### BUD_opt44  overrides=[] patch=none
+  ktest_L01        fill= 43.3 cog= 53.1 stab= 33.9 place=100.0 soft=100.0 | comp= 66.0 packed=75.6% disp=0.122
+  ktest_L08        fill= 35.3 cog= 51.8 stab= 47.0 place=100.0 soft= 90.9 | comp= 65.0 packed=75.6% disp=0.103
+  ktest_L11        fill= 43.5 cog= 51.9 stab= 32.2 place= 90.0 soft= 75.0 | comp= 58.5 packed=64.4% disp=0.138
+  ktest_L15        fill= 37.8 cog= 54.3 stab= 38.3 place= 90.0 soft= 93.3 | comp= 62.7 packed=87.5% disp=0.131
+  ktest_L16        fill= 31.3 cog= 56.1 stab= 19.5 place=100.0 soft=100.0 | comp= 61.4 packed=46.7% disp=0.333
+  ktest_L17        fill= 35.5 cog= 54.9 stab= 35.9 place=100.0 soft=100.0 | comp= 65.2 packed=58.0% disp=0.207
+  ktest_L18        fill= 44.2 cog= 53.4 stab= 44.3 place=100.0 soft= 68.8 | comp= 62.1 packed=84.4% disp=0.106
+  ktest_L19        fill= 37.7 cog= 56.1 stab= 38.8 place=100.0 soft= 94.2 | comp= 65.4 packed=96.2% disp=0.145
+  ktest_L20        fill= 40.1 cog= 52.9 stab= 30.2 place=100.0 soft=100.0 | comp= 64.6 packed=67.5% disp=0.146
+  ktest_L25        fill= 42.3 cog= 52.5 stab= 34.9 place=100.0 soft=100.0 | comp= 66.0 packed=85.0% disp=0.139
+  ktest_L26        fill= 35.3 cog= 51.7 stab= 29.2 place=100.0 soft=100.0 | comp= 63.2 packed=48.9% disp=0.194
+  ktest_L27        fill= 31.4 cog= 54.5 stab= 42.4 place=100.0 soft= 87.5 | comp= 63.2 packed=75.0% disp=0.152
+  ktest_L28        fill= 40.3 cog= 53.3 stab= 37.8 place=100.0 soft=100.0 | comp= 66.3 packed=84.4% disp=0.185
+  ktest_L30        fill= 41.9 cog= 55.1 stab= 51.2 place=100.0 soft= 83.3 | comp= 66.3 packed=87.5% disp=0.097
+  pool_P07         fill= 40.4 cog= 54.0 stab= 26.9 place=100.0 soft=100.0 | comp= 64.3 packed=55.6% disp=0.176
+  pool_P10         fill= 34.7 cog= 52.0 stab= 25.8 place=100.0 soft=100.0 | comp= 62.5 packed=48.9% disp=0.237
+  pool_P16         fill= 33.0 cog= 58.0 stab= 45.2 place=100.0 soft= 80.0 | comp= 63.2 packed=100.0% disp=0.152
+  pool_P18         fill= 34.4 cog= 52.9 stab= 27.2 place=100.0 soft=100.0 | comp= 62.9 packed=62.5% disp=0.195
+  pool_P27         fill= 40.9 cog= 53.2 stab= 39.2 place= 87.5 soft= 50.0 | comp= 54.1 packed=58.0% disp=0.110
+  pool_P29         fill= 46.9 cog= 50.4 stab= 38.8 place=100.0 soft= 87.5 | comp= 64.7 packed=60.0% disp=0.103
+  pool_P31         fill= 46.5 cog= 54.9 stab= 39.9 place= 50.0 soft= 91.2 | comp= 56.5 packed=87.5% disp=0.116
+  shelftest_T00    fill= 42.5 cog= 52.9 stab= 48.0 place=100.0 soft= 72.2 | comp= 63.1 packed=73.3% disp=0.091
+  shelftest_T01    fill= 34.5 cog= 53.6 stab= 34.4 place=100.0 soft=100.0 | comp= 64.5 packed=56.0% disp=0.156
+  shelftest_T03    fill= 38.1 cog= 54.6 stab= 26.7 place=100.0 soft=100.0 | comp= 63.9 packed=55.0% disp=0.174
+  shelftest_T04    fill= 41.3 cog= 51.0 stab= 32.2 place= 77.8 soft=100.0 | comp= 60.5 packed=62.0% disp=0.145
+  shelftest_T08    fill= 36.3 cog= 58.1 stab= 45.6 place=100.0 soft= 85.7 | comp= 65.1 packed=82.5% disp=0.117
+  shelftest_T12    fill= 36.7 cog= 53.1 stab= 48.0 place=100.0 soft= 78.6 | comp= 63.3 packed=72.5% disp=0.088
+  shelftest_T20    fill= 39.8 cog= 53.8 stab= 42.0 place=100.0 soft=100.0 | comp= 67.1 packed=68.9% disp=0.114
+  shelftest_T22    fill= 30.0 cog= 55.0 stab= 28.2 place=100.0 soft=100.0 | comp= 62.6 packed=46.0% disp=0.183
+  shelftest_T24    fill= 30.7 cog= 57.4 stab= 55.7 place=100.0 soft= 54.2 | comp= 59.6 packed=67.5% disp=0.132
+  shelftest_T27    fill= 35.9 cog= 50.9 stab= 29.4 place=100.0 soft= 75.0 | comp= 58.2 packed=50.0% disp=0.176
+  shelftest_T29    fill= 24.5 cog= 54.3 stab= 32.5 place=100.0 soft=100.0 | comp= 62.3 packed=42.0% disp=0.213
+  test_T00         fill= 40.8 cog= 53.4 stab= 32.2 place=100.0 soft=100.0 | comp= 65.3 packed=53.0% disp=0.131
+  test_T04         fill= 40.3 cog= 55.3 stab= 39.1 place= 70.0 soft=100.0 | comp= 60.9 packed=64.4% disp=0.120
+  test_T05         fill= 42.9 cog= 54.1 stab= 42.0 place=100.0 soft=100.0 | comp= 67.8 packed=75.0% disp=0.107
+  test_T10         fill= 28.9 cog= 55.2 stab= 45.6 place=100.0 soft=100.0 | comp= 65.9 packed=56.0% disp=0.125
+  test_T11         fill= 43.4 cog= 52.5 stab= 35.9 place=100.0 soft=100.0 | comp= 66.4 packed=58.0% disp=0.167
+  test_T12         fill= 29.4 cog= 55.1 stab= 25.2 place=100.0 soft=100.0 | comp= 61.9 packed=40.0% disp=0.331
+  test_T13         fill= 41.7 cog= 54.4 stab= 32.8 place= 62.5 soft= 92.9 | comp= 56.8 packed=57.0% disp=0.133
+  test_T14         fill= 28.2 cog= 57.1 stab= 53.5 place=100.0 soft= 73.3 | comp= 62.4 packed=57.5% disp=0.134
+  test_T15         fill= 37.1 cog= 52.4 stab= 25.6 place=100.0 soft= 94.4 | comp= 61.9 packed=49.0% disp=0.293
+  test_T25         fill= 31.1 cog= 54.5 stab= 33.9 place= 75.0 soft= 95.2 | comp= 57.9 packed=61.2% disp=0.201
+  test_T27         fill= 37.2 cog= 56.7 stab= 41.6 place=100.0 soft= 91.7 | comp= 65.4 packed=66.7% disp=0.127
+  test_T28         fill= 40.4 cog= 53.8 stab= 45.7 place= 86.4 soft= 96.0 | comp= 64.4 packed=78.8% disp=0.116
+  == norm%=52.01 fill=37.46 cog=54.00 stab=37.15 place=95.21 soft=91.16 | COMPOSITE=62.99 packed=65.9%  [1257s]

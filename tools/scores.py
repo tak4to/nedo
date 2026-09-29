@@ -72,6 +72,42 @@ def placement_scores(env):
     return res
 
 
+def placement_scores_contact(env):
+    """Same as placement_scores, but "buried" means an item of another class
+    physically TOUCHES it from above (PyBullet contact points), which is what
+    README describes (下敷き, 上方向からの接触判定がある). placement_scores
+    counts anything above in the same column, however far up: on 128 scenes
+    that flagged 237 soft items against 15 actually touched, the upper item a
+    median 0.39 m higher (tools/viol_trace.py). Must run before the shake."""
+    bs = _boxes(env)
+    any_prio_c = any(c.is_prioritized for c in env.container_manager.containers)
+    res = {}
+    for kind in ('prio', 'soft'):
+        cls = (lambda it: it.is_prioritized) if kind == 'prio' else (lambda it: it.is_soft)
+        members = [b for b in bs if cls(b['it'])]
+        if not members:
+            res[kind] = (100.0, 0, 0)
+            continue
+        bad = 0
+        for b in members:
+            top = b['pos'][2] + b['h'][2]
+            for o in bs:
+                if o is b or o['c'] is not b['c'] or cls(o['it']) == cls(b['it']):
+                    continue
+                if o['pos'][2] - o['h'][2] < top - 0.02 or o['pos'][2] <= b['pos'][2]:
+                    continue
+                cps = env.client.getContactPoints(bodyA=b['it'].pybullet_id,
+                                                  bodyB=o['it'].pybullet_id)
+                if any(cp[8] < 0.005 for cp in cps):
+                    bad += 1
+                    break
+        wrong = 0
+        if kind == 'prio' and any_prio_c:
+            wrong = sum(1 for b in members if not b['c'].is_prioritized)
+        res[kind] = (100.0 * (1.0 - (bad + wrong) / (2 * len(members))), bad, wrong)
+    return res
+
+
 PHYSICS_DT = 1.0 / 240.0  # pybullet default; env.py never calls setTimeStep
 
 # Normalisation constants for the force/energy components below. Following
@@ -224,10 +260,13 @@ def stability_score(env, tilt=0.30, cycles=2, steps_per=150, settle=200, sample_
 def all_scores(env, per_item=False):
     cog, cog_z = cog_score(env)
     pl = placement_scores(env)
+    plc = placement_scores_contact(env)     # before the shake moves anything
     stab = stability_score(env)
     out = dict(cog_score=cog, cog_z=cog_z,
                placement_score=pl['prio'][0], soft_item_score=pl['soft'][0],
                n_prio_bad=pl['prio'][1], n_prio_wrong=pl['prio'][2], n_soft_bad=pl['soft'][1],
+               placement_contact=plc['prio'][0], soft_contact=plc['soft'][0],
+               n_prio_contact=plc['prio'][1], n_soft_contact=plc['soft'][1],
                stability_score=stab['stability_score'],
                shake_mean_disp=stab['shake_mean_disp'], shake_n_moved=stab['shake_n_moved'],
                shake_mean_peak_force=stab['shake_mean_peak_force'],

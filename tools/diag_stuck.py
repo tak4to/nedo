@@ -3,7 +3,7 @@ simulator (not the agent's oracle) whether any legal placement remains."""
 import os, sys, json, io, contextlib, math, time
 import numpy as np
 ROOT='/home/takato/comp/nedo'
-sys.path.insert(0, ROOT); sys.path.insert(0, os.path.join(ROOT,'agents','submit'))
+sys.path.insert(0, ROOT); sys.path.insert(0, os.environ.get('AGENT_DIR') or os.path.join(ROOT,'agents','submit'))
 from src.ground_handling.env import GroundHandlingEnv
 import geometry, packer, agent as agent_module
 

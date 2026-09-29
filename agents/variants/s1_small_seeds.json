@@ -1,0 +1,22 @@
+{
+ "tag": "s1_small_seeds",
+ "base_dir": "agents/submit",
+ "git_head": "5aa1b7a",
+ "base_sha": {
+  "agent.py": "fcb7b6f20798",
+  "packer.py": "eeebe44e748f",
+  "geometry.py": "e075a840f101",
+  "twin.py": "e5b0dc4a8a35"
+ },
+ "out_sha": {
+  "agent.py": "8e98f2ee4468",
+  "packer.py": "eeebe44e748f",
+  "geometry.py": "e075a840f101",
+  "twin.py": "e5b0dc4a8a35"
+ },
+ "zip_sha": "993f0c5d42d4",
+ "changed": [
+  "agent.py"
+ ],
+ "diff": "--- submit/agent.py\n+++ s1_small_seeds/agent.py\n@@ -60,6 +60,19 @@\n # two-submission portfolio in docs/GAMEPLAN.md #5.2; 'fixed' is the\n # defensive half, and agents/submit_safe.zip ships it.\n OFFLINE_SEARCH = 'lns'\n+\n+# Small-first seed orders, on varied items only (2026-09-23). Every other\n+# seed the search starts from is big-first -- four descending sort keys,\n+# GRASP keys with positive weights -- while its objective is the placed\n+# count, so on items of many different sizes it never looked at orders\n+# that place the small ones first. On our 44 optimize scenes with random\n+# item dims (k=1) this took placed 1246 -> 1436 (packed% +7.32 se 1.18,\n+# fill -1.61 se 0.82); on the public repo's 26-scene suite 690 -> 830.\n+# On catalogue scenes (sizes close together) it buys no items and costs\n+# 2-3 fill, hence the gate: distinct shapes / items is 0.06-0.17 there\n+# (5-7 shapes) and 1.00 when every item has its own dimensions.\n+OFFLINE_SMALL_SEEDS = True\n+SMALL_SEEDS_MIN_DIVERSITY = 0.5\n \n # Physics-twin settle gate: BUILT, CALIBRATED, MEASURED, AND TURNED OFF.\n #\n@@ -306,6 +319,8 @@\n         deadline = time.perf_counter() + OPTIMIZE_TIME_BUDGET\n         try:\n             specs = [_item_spec(d) for d in item_list]\n+            diversity = len({tuple(sorted((s['length'], s['width'], s['height'])))\n+                             for s in specs}) / max(1, len(specs))\n             all_indices = [s['index'] for s in specs]\n             by_index = {s['index']: s for s in specs}\n             containers = self._known_containers\n@@ -493,6 +508,14 @@\n                 return [by_index[i] for i in order]\n \n             base_keys = [sort_key_volume, sort_key_footprint, sort_key_height, sort_key_mass]\n+            if OFFLINE_SMALL_SEEDS and diversity >= SMALL_SEEDS_MIN_DIVERSITY:\n+                def sort_key_volume_asc(s):\n+                    return (1 if s['is_soft'] else 0, s['length'] * s['width'] * s['height'])\n+\n+                def sort_key_maxdim_asc(s):\n+                    return (1 if s['is_soft'] else 0, max(s['length'], s['width'], s['height']),\n+                            s['length'] * s['width'] * s['height'])\n+                base_keys += [sort_key_volume_asc, sort_key_maxdim_asc]\n \n             best_key = (-1, -1.0)\n             best_order = list(all_indices)\n"
+}

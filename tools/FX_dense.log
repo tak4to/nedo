@@ -1,0 +1,39 @@
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+pybullet build time: Aug 29 2026 17:03:42
+### FX_dense  overrides=[] patch=none
+  D00              fill= 39.7 cog= 55.5 stab= 39.5 place=100.0 soft= 88.9 | comp= 64.7 packed=51.7% disp=0.136
+  D01              fill= 32.2 cog= 56.7 stab= 35.0 place=100.0 soft=100.0 | comp= 64.8 packed=49.1% disp=0.129
+  D02              fill= 32.4 cog= 56.4 stab= 36.1 place=100.0 soft= 90.6 | comp= 63.1 packed=58.0% disp=0.164
+  D03              fill= 42.1 cog= 54.0 stab= 32.5 place=100.0 soft=100.0 | comp= 65.7 packed=62.0% disp=0.171
+  D04              fill= 35.0 cog= 53.4 stab= 44.0 place=100.0 soft= 94.4 | comp= 65.4 packed=50.9% disp=0.133
+  D05              fill= 37.8 cog= 55.1 stab= 32.7 place=100.0 soft=100.0 | comp= 65.1 packed=45.0% disp=0.147
+  D06              fill= 35.1 cog= 57.3 stab= 31.9 place=100.0 soft=100.0 | comp= 64.9 packed=52.0% disp=0.171
+  D07              fill= 42.4 cog= 53.3 stab= 30.8 place=100.0 soft=100.0 | comp= 65.3 packed=62.0% disp=0.146
+  D08              fill= 42.1 cog= 53.3 stab= 29.4 place=100.0 soft=100.0 | comp= 65.0 packed=56.4% disp=0.166
+  D09              fill= 34.3 cog= 55.3 stab= 66.5 place=100.0 soft= 86.4 | comp= 68.5 packed=54.5% disp=0.058
+  D10              fill= 33.3 cog= 53.2 stab= 24.7 place=100.0 soft=100.0 | comp= 62.2 packed=48.0% disp=0.172
+  D11              fill= 41.5 cog= 54.4 stab= 29.6 place=100.0 soft= 66.7 | comp= 58.4 packed=60.0% disp=0.157
+  D12              fill= 41.1 cog= 51.1 stab= 39.4 place=100.0 soft= 94.0 | comp= 65.1 packed=62.7% disp=0.142
+  D13              fill= 32.1 cog= 53.4 stab= 43.1 place=100.0 soft= 76.9 | comp= 61.1 packed=56.0% disp=0.140
+  D14              fill= 42.4 cog= 53.5 stab= 35.0 place=100.0 soft=100.0 | comp= 66.2 packed=61.8% disp=0.116
+  D15              fill= 39.8 cog= 52.4 stab= 40.6 place=100.0 soft= 92.3 | comp= 65.0 packed=76.0% disp=0.140
+  D16              fill= 36.4 cog= 55.7 stab= 48.8 place= 75.0 soft=100.0 | comp= 63.2 packed=53.3% disp=0.119
+  D17              fill= 41.4 cog= 53.0 stab= 29.0 place=100.0 soft=100.0 | comp= 64.7 packed=46.7% disp=0.144
+  D18              fill= 32.1 cog= 53.5 stab= 39.6 place=100.0 soft= 92.9 | comp= 63.6 packed=50.9% disp=0.218
+  D19              fill= 35.8 cog= 52.0 stab= 27.8 place=100.0 soft=100.0 | comp= 63.1 packed=43.6% disp=0.155
+  D20              fill= 41.6 cog= 53.5 stab= 27.6 place=100.0 soft=100.0 | comp= 64.5 packed=52.7% disp=0.166
+  D21              fill= 26.7 cog= 53.8 stab= 38.6 place=100.0 soft= 92.9 | comp= 62.4 packed=42.7% disp=0.183
+  D22              fill= 38.5 cog= 54.7 stab= 37.5 place= 93.3 soft= 97.4 | comp= 64.3 packed=53.3% disp=0.146
+  D23              fill= 38.2 cog= 54.9 stab= 37.9 place=100.0 soft= 90.0 | comp= 64.2 packed=62.0% disp=0.139
+  D24              fill= 29.7 cog= 54.8 stab= 51.8 place= 66.7 soft= 81.2 | comp= 56.8 packed=50.0% disp=0.094
+  D25              fill= 37.6 cog= 55.0 stab= 34.2 place=100.0 soft= 62.5 | comp= 57.8 packed=50.0% disp=0.148
+  D26              fill= 35.0 cog= 56.5 stab= 38.8 place=100.0 soft= 85.7 | comp= 63.2 packed=56.4% disp=0.138
+  D27              fill= 27.5 cog= 52.7 stab= 34.0 place=100.0 soft= 92.9 | comp= 61.4 packed=56.4% disp=0.201
+  D28              fill= 36.0 cog= 54.1 stab= 28.9 place= 50.0 soft=100.0 | comp= 53.8 packed=46.0% disp=0.131
+  D29              fill= 39.0 cog= 55.8 stab= 32.9 place=100.0 soft=100.0 | comp= 65.5 packed=45.5% disp=0.135
+  D30              fill= 30.3 cog= 51.6 stab= 51.8 place= 75.0 soft= 93.5 | comp= 60.4 packed=65.0% disp=0.127
+  D31              fill= 30.2 cog= 56.3 stab= 45.6 place=100.0 soft= 90.0 | comp= 64.4 packed=45.0% disp=0.124
+  == norm%=42.10 fill=36.23 cog=54.26 stab=37.35 place=95.62 soft=92.78 | COMPOSITE=63.25 packed=53.9%  [556s]

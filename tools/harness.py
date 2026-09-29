@@ -107,8 +107,26 @@ def extra_scores(env):
             if b['it'].is_prioritized and not b['c'].is_prioritized:
                 n_prio_wrong += 1
     top_z = max((b['pos'][2] + b['h'][2]) for b in boxes)
+    # Retrievability of priority baggage (docs/2026-09-23-現場の実務と再現・優先度.md
+    # P3): the operation needs those bags out first, which means near the door
+    # and near the top, not merely "not buried". Both are 0 at the door / floor
+    # and 1 at the back wall / the stack's top, averaged over priority items
+    # actually placed; None when the scene has none.
+    prio = [b for b in boxes if b['it'].is_prioritized]
+    prio_depth = prio_height = None
+    if prio:
+        ds, hs = [], []
+        for b in prio:
+            c = b['c']
+            # container-local y; the door face is at -width/2, the back at +width/2
+            y0 = c.global_to_local(b['pos'])[1]
+            ds.append((y0 + c.width / 2) / c.width)
+            hs.append((b['pos'][2] + b['h'][2]) / max(top_z, 1e-6))
+        prio_depth = sum(ds) / len(ds)
+        prio_height = sum(hs) / len(hs)
     return dict(cog_h=cog_z, cog_score=cog_score, n_prio_buried=n_prio_buried,
-                n_soft_buried=n_soft_buried, n_prio_wrong=n_prio_wrong, top_z=top_z)
+                n_soft_buried=n_soft_buried, n_prio_wrong=n_prio_wrong, top_z=top_z,
+                n_prio_placed=len(prio), prio_depth=prio_depth, prio_height=prio_height)
 
 
 def ceiling_fill(cfg):

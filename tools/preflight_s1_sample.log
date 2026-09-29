@@ -1,0 +1,175 @@
+pybullet build time: Aug 29 2026 17:03:42
+
+== static: agents/variants/s1_small_seeds.zip
+  [ok  ] layout -- agent.py at 'submit/agent.py', top-level entries ['submit']
+
+== dynamic: /home/takato/comp/nedo/configs/sample_config.json tasks=all cpus=4 load=2
+Perform Optimization!
+transport item 3
+place item 3
+transport item 17
+place item 17
+transport item 21
+place item 21
+transport item 33
+place item 33
+transport item 5
+place item 5
+transport item 8
+place item 8
+transport item 19
+place item 19
+transport item 4
+place item 4
+transport item 35
+place item 35
+transport item 20
+place item 20
+transport item 13
+place item 13
+transport item 23
+place item 23
+transport item 39
+place item 39
+transport item 9
+place item 9
+transport item 22
+place item 22
+transport item 2
+place item 2
+transport item 11
+place item 11
+transport item 10
+place item 10
+transport item 30
+place item 30
+transport item 7
+place item 7
+transport item 18
+place item 18
+transport item 29
+place item 29
+transport item 6
+place item 6
+transport item 12
+place item 12
+transport item 32
+place item 32
+transport item 0
+place item 0
+transport item 24
+place item 24
+transport item 27
+place item 27
+transport item 34
+place item 34
+transport item 31
+place item 31
+transport item 26
+place item 26
+transport item 25
+place item 25
+transport item 37
+place item 37
+transport item 16
+collision: 16 and 22 at (np.float32(0.0), np.float32(-0.725), np.float32(0.175)), distance -0.13608520264355908
+collision: 16 and 11 at (np.float32(0.0), np.float32(-0.725), np.float32(0.175)), distance -0.00010953040270546125
+collision: 16 and 27 at (np.float32(0.0), np.float32(-0.725), np.float32(0.175)), distance -0.09921269554758749
+item 16 not packable. removed.
+item 21 not inside (hit boundary plane), [ 5.74506419e-05 -5.66561135e-01 -1.53005745e+00 -1.35343886e+00
+ -6.30907478e-01 -1.38802525e+00 -2.19747532e-02]
+item 35 not inside (hit boundary plane), [ 6.13950829e-05 -4.71743336e-01 -1.53006140e+00 -1.44825666e+00
+ -6.94685913e-01 -1.38763278e+00 -2.23672189e-02]
+item 22 not inside (hit boundary plane), [ 3.75396416e-05 -1.22714299e+00 -1.53003754e+00 -6.92857014e-01
+ -1.86566772e-01 -6.89014494e-01 -7.20985506e-01]
+item 29 not inside (hit boundary plane), [ 1.15974198e-04 -4.23431048e-01 -1.53011597e+00 -1.49656895e+00
+ -7.27143890e-01 -5.91294211e-01 -8.18705789e-01]
+item 27 not inside (hit boundary plane), [ 7.82867464e-06 -4.94127909e-01 -1.53000783e+00 -1.42587209e+00
+ -6.79668056e-01 -5.90772518e-01 -8.19227482e-01]
+close env.
+closed runner.
+transport item 0
+place item 0
+transport item 7
+place item 7
+transport item 8
+place item 8
+transport item 9
+place item 9
+transport item 2
+place item 2
+transport item 5
+place item 5
+transport item 6
+place item 6
+transport item 16
+place item 16
+transport item 10
+place item 10
+transport item 15
+place item 15
+transport item 18
+place item 18
+transport item 20
+place item 20
+transport item 1
+place item 1
+transport item 22
+place item 22
+transport item 3
+place item 3
+transport item 24
+place item 24
+transport item 4
+place item 4
+transport item 11
+place item 11
+transport item 27
+place item 27
+transport item 12
+place item 12
+transport item 29
+place item 29
+transport item 13
+place item 13
+transport item 14
+place item 14
+transport item 17
+place item 17
+transport item 19
+place item 19
+transport item 21
+place item 21
+transport item 25
+place item 25
+transport item 23
+collision: 23 and 24 at (np.float32(0.0), np.float32(-0.76), np.float32(0.195)), distance -0.1115226501753534
+collision: 23 and 11 at (np.float32(0.0), np.float32(-0.76), np.float32(0.195)), distance 0.01280331346497399
+collision: 23 and 14 at (np.float32(0.0), np.float32(-0.76), np.float32(0.195)), distance -0.17798759062155572
+collision: 23 and 17 at (np.float32(0.0), np.float32(-0.76), np.float32(0.195)), distance -0.030132486146977843
+item 23 not packable. removed.
+item 6 not inside (hit boundary plane), [ 1.13020089e-05 -8.38804400e-01 -1.52001130e+00 -1.06119560e+00
+ -4.50566071e-01 -1.45064325e+00 -1.93567497e-02]
+item 16 not inside (hit boundary plane), [ 9.60882630e-06 -2.10132471e-02 -1.52000961e+00 -1.87898675e+00
+ -1.00756809e+00 -1.44794817e+00 -2.20518333e-02]
+item 20 not inside (hit boundary plane), [-6.90833061e-06 -8.41384513e-01 -1.51999309e+00 -1.05861549e+00
+ -4.48822079e-01 -9.76133463e-01 -4.93866537e-01]
+item 24 not inside (hit boundary plane), [-9.98668249e-06 -8.16038049e-01 -1.51999001e+00 -1.08396195e+00
+ -4.66087909e-01 -8.63518857e-01 -6.06481143e-01]
+item 14 not inside (hit boundary plane), [ 5.71157597e-06 -8.58868672e-01 -1.52000571e+00 -1.04113133e+00
+ -4.36904309e-01 -4.47289698e-01 -1.02271030e+00]
+item 25 not inside (hit boundary plane), [-1.28896631 -0.8064014  -0.23103369 -1.0935986  -1.4164082   0.00504729
+ -1.47504729]
+close env.
+closed runner.
+  [ok  ] task 000 -- fill=44.10 placed=0.805
+  [ok  ] task 001 -- fill=30.32 placed=0.643
+  [ok  ] get_init_states: 2 calls, 0 timeouts -- worst 0.14s of 10s (1%)
+  [ok  ] optimize: 1 calls, 0 timeouts -- worst 149.84s of 180s (83%)
+  [ok  ] policy: 62 calls, 0 timeouts -- worst 5.12s of 10s (51%)
+  [ok  ] peak child RSS -- 81 MB of 12288 MB max_mem
+  [ok  ] wall time -- 194s
+
+PREFLIGHT PASS  (0 warnings)
+argv[0]=
+argv[0]=

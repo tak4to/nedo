@@ -1,0 +1,22 @@
+{
+ "tag": "sliver400",
+ "base_dir": "agents/submit",
+ "git_head": "5aa1b7a",
+ "base_sha": {
+  "agent.py": "fcb7b6f20798",
+  "packer.py": "eeebe44e748f",
+  "geometry.py": "e075a840f101",
+  "twin.py": "e5b0dc4a8a35"
+ },
+ "out_sha": {
+  "agent.py": "fcb7b6f20798",
+  "packer.py": "86565d5d2720",
+  "geometry.py": "e075a840f101",
+  "twin.py": "e5b0dc4a8a35"
+ },
+ "zip_sha": "213de643deca",
+ "changed": [
+  "packer.py"
+ ],
+ "diff": "--- submit/packer.py\n+++ sliver400/packer.py\n@@ -412,6 +412,68 @@\n     tot = S[i1, j1] - S[i0, j1] - S[i1, j0] + S[i0, j0]\n     mean_h = tot / ((i1 - i0) * (j1 - j0))\n     return np.maximum((cz - hz) - mean_h, 0.0)\n+\n+\n+# Cutting-stock's \"no small offcut\" rule.\n+#\n+# At the jam state 23.6% of the container is air in columns narrower than\n+# the smallest item -- gaps between towers that nothing can ever use --\n+# while 89-96% of all candidate rejections are \"too tall\"\n+# (docs/2026-09-23-現場の実務と再現・優先度.md §6.2). W_WALL rewards landing\n+# flush against a wall and W_SEAM rewards lining up with the support, but\n+# nothing noticed that a placement leaves a 12cm strip beside it that no\n+# remaining item can ever enter.\n+#\n+# A gap is \"flush\" up to SLIVER_LO (the design clearance plus a little) and\n+# usable from SLIVER_HI (the catalogue's smallest footprint side plus\n+# clearance on both sides); in between it is waste, and the penalty is\n+# proportional to the width thrown away.\n+#\n+# Measured at this weight: on 6 dense scenes the void budget moves\n+# sliver 23.6% -> 20.8%, items 52.1% -> 54.2%, unreachable air 13.3% ->\n+# 10.8%. On 64 dense scenes (dev + holdout, paired) the placed count is\n+# flat -- packed% +0.20 (se 0.75) -- while fill gains +0.61 (se 0.61):\n+# the freed space goes to larger items rather than to more of them.\n+# 1500 and 5000 lose monotonically (-1.05 / -4.66 packed%).\n+W_SLIVER = 400.0\n+SLIVER_LO = GAP + 0.012      # at or below this the neighbour is effectively flush\n+SLIVER_HI = 0.20 + 2 * GAP   # smallest catalogue side + clearance on both sides\n+\n+\n+def _offcut_widths(cstate, cands):\n+    \"\"\"Unusable strip width each candidate would leave to its left/right.\n+\n+    Only the neighbours that share the candidate's y band and height band\n+    can bound the strip, so the free run is measured against those.\n+    Vectorised over candidates x placed boxes; returns metres of waste\n+    (0 when both sides are flush or usably wide).\n+    \"\"\"\n+    import numpy as np\n+    g = cstate.geom\n+    n = len(cands)\n+    cx = np.fromiter((c[1] for c in cands), float, n)\n+    cy = np.fromiter((c[2] for c in cands), float, n)\n+    cz = np.fromiter((c[3] for c in cands), float, n)\n+    hx = np.fromiter((c[4] for c in cands), float, n)\n+    hy = np.fromiter((c[5] for c in cands), float, n)\n+    hz = np.fromiter((c[6] for c in cands), float, n)\n+    lo_x, hi_x = cx - hx, cx + hx\n+    left = np.full(n, g['x_lo'])\n+    right = np.full(n, g['x_hi'])\n+    for b in cstate.boxes + cstate.static_obstacles:\n+        bcx, bcy, bcz = b['center']\n+        bhx, bhy, bhz = b['half']\n+        hit = (np.abs(cy - bcy) < hy + bhy) & (np.abs(cz - bcz) < hz + bhz)\n+        if not hit.any():\n+            continue\n+        edge_r = bcx + bhx\n+        edge_l = bcx - bhx\n+        np.maximum(left, np.where(hit & (edge_r <= lo_x + 1e-9), edge_r, -np.inf), out=left)\n+        np.minimum(right, np.where(hit & (edge_l >= hi_x - 1e-9), edge_l, np.inf), out=right)\n+    waste = np.zeros(n)\n+    for gap in (lo_x - left, right - hi_x):\n+        waste += np.where((gap > SLIVER_LO) & (gap < SLIVER_HI), gap, 0.0)\n+    return waste\n \n \n def _side_contact_frac(cstate, cx, cy, hx, hy, bottom, top, fx, fy, fz):\n@@ -1266,6 +1328,10 @@\n         depths = _waste_depths(cstate, candidates)\n         candidates = [(c[0] - W_WASTE * float(d),) + c[1:]\n                       for c, d in zip(candidates, depths)]\n+    if W_SLIVER and candidates:\n+        waste = _offcut_widths(cstate, candidates)\n+        candidates = [(c[0] - W_SLIVER * float(w),) + c[1:]\n+                      for c, w in zip(candidates, waste)]\n     candidates.sort(key=lambda c: -c[0])\n     # Drop candidates that describe the *same box in the same place*.\n     #\n"
+}
